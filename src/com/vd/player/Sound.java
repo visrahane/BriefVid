@@ -71,12 +71,13 @@ public class Sound {
 		byte[] audioBuffer = new byte[EXTERNAL_BUFFER_SIZE];
 
 		try {
-			readBytes = audioInputStream.read(audioBuffer, 0,
-					audioBuffer.length);
-			if (readBytes >= 0){
-				dataLine.write(audioBuffer, 0, readBytes);
+			while (readBytes != -1) {
+				readBytes = audioInputStream.read(audioBuffer, 0,
+						audioBuffer.length);
+				if (readBytes >= 0){
+					dataLine.write(audioBuffer, 0, readBytes);
+				}
 			}
-
 		} catch (IOException e1) {
 			throw new PlayWaveException(e1);
 		} finally {
