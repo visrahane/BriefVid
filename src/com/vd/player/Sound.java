@@ -1,6 +1,7 @@
 package com.vd.player;
 
 import java.io.BufferedInputStream;
+import java.io.Console;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -25,7 +26,7 @@ public class Sound {
 
 	private InputStream waveStream;
 
-	private final int EXTERNAL_BUFFER_SIZE = 524288; // 128Kb
+	private final int EXTERNAL_BUFFER_SIZE = 524288; // 128KB
 
 	/**
 	 * CONSTRUCTOR
@@ -36,7 +37,10 @@ public class Sound {
 	}
 
 	public void play() throws PlayWaveException {
-
+		
+		// 44100 samples per sec 2 bytes per samples 300 secs
+		// 44100 * 2 * 300
+		
 		AudioInputStream audioInputStream = null;
 		try {
 			audioInputStream = AudioSystem.getAudioInputStream(waveStream);
@@ -58,7 +62,7 @@ public class Sound {
 		} catch (LineUnavailableException e1) {
 			throw new PlayWaveException(e1);
 		}
-
+		
 		// Starts the music :P
 		dataLine.start();
 
@@ -79,6 +83,7 @@ public class Sound {
 			// plays what's left and and closes the audioChannel
 			dataLine.drain();
 			dataLine.close();
+			System.out.println("audio file read bytes: " + readBytes);
 		}
 
 	}
