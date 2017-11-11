@@ -8,12 +8,11 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine.Info;
-
-import com.vd.exception.PlayWaveException;
-
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
+
+import com.vd.exception.PlayWaveException;
 
 /**
  *
@@ -24,6 +23,8 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 public class Sound {
 
 	private InputStream waveStream;
+
+	private AudioInputStream audioInputStream;
 
 	private final int EXTERNAL_BUFFER_SIZE = 524288; // 128Kb
 
@@ -37,7 +38,6 @@ public class Sound {
 
 	public void play() throws PlayWaveException {
 
-		AudioInputStream audioInputStream = null;
 		try {
 			audioInputStream = AudioSystem.getAudioInputStream(waveStream);
 		} catch (UnsupportedAudioFileException e1) {
@@ -59,6 +59,11 @@ public class Sound {
 			throw new PlayWaveException(e1);
 		}
 
+		startMusic(audioInputStream, dataLine);
+
+	}
+
+	private void startMusic(AudioInputStream audioInputStream, SourceDataLine dataLine) throws PlayWaveException {
 		// Starts the music :P
 		dataLine.start();
 
@@ -66,13 +71,12 @@ public class Sound {
 		byte[] audioBuffer = new byte[EXTERNAL_BUFFER_SIZE];
 
 		try {
-			while (readBytes != -1) {
-				readBytes = audioInputStream.read(audioBuffer, 0,
-						audioBuffer.length);
-				if (readBytes >= 0){
-					dataLine.write(audioBuffer, 0, readBytes);
-				}
+			readBytes = audioInputStream.read(audioBuffer, 0,
+					audioBuffer.length);
+			if (readBytes >= 0){
+				dataLine.write(audioBuffer, 0, readBytes);
 			}
+
 		} catch (IOException e1) {
 			throw new PlayWaveException(e1);
 		} finally {
@@ -80,6 +84,5 @@ public class Sound {
 			dataLine.drain();
 			dataLine.close();
 		}
-
 	}
 }

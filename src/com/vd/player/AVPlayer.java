@@ -17,6 +17,7 @@ import javax.swing.JLabel;
 import com.vd.constants.VideoConstant;
 import com.vd.exception.PlayWaveException;
 import com.vd.io.VideoIOUtil;
+import com.vd.services.ImageDisplayService;
 
 
 public class AVPlayer {
@@ -140,23 +141,36 @@ public class AVPlayer {
 		}
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		if (args.length < 2) {
 			System.err.println("usage: java -jar AVPlayer.jar [RGB file] [WAV file]");
 			return;
 		}
 		AVPlayer ren = new AVPlayer();
+		ImageDisplayService outputDisplayService = new ImageDisplayService("DWT Output Image");
 		// List<byte[]> framesList = ren.getAllFrames(args);
 		// read 1st 1000 frames and display first and last frame for testing
-		for (int i = 0; i < 5000;) {
+		Thread t = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				ren.playWAV(args[1]);
+			}
+
+		});
+
+		t.start();
+		for (int i = 0; i < 6000; i++) {
 			byte[] frameBytes = VideoIOUtil.readFrameBuffer(new File(args[0]), i);
 			// ren.displayVideo(args, framesList);
 			BufferedImage img = VideoIOUtil.getFrame(frameBytes);
-			ren.displayFrame(img, args);
-			i += 4999;
+			outputDisplayService.displayImage(img);
+			Thread.sleep(50);
+			// ren.displayFrame(img, args);
+
 		}
 
-		ren.playWAV(args[1]);
+		// ren.playWAV(args[1]);
 	}
 
 }
