@@ -59,7 +59,28 @@ public class VideoIOUtil {
 		}
 		return bufferedImage;
 	}
-
+	
+	public static List<BufferedImage> getAllFrames(List<byte[]> bytes) {
+		List<BufferedImage> bufferedImages = new ArrayList<>();
+		
+		for(int i=0; i<1000; i++) {
+			for (int y = 0, ind = 0; y < VideoConstant.VIDEO_PLAYER_HEIGHT; y++) {
+				for (int x = 0; x < VideoConstant.VIDEO_PLAYER_WIDTH; x++, ind++) {
+					
+					BufferedImage img = new BufferedImage(VideoConstant.VIDEO_PLAYER_WIDTH, VideoConstant.VIDEO_PLAYER_HEIGHT, BufferedImage.TYPE_INT_RGB);
+					byte r = bytes.get(i)[ind];
+					byte g = bytes.get(i)[ind + img.getHeight() * img.getWidth()];
+					byte b = bytes.get(i)[ind + img.getHeight() * img.getWidth() * 2];
+	
+					int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
+					img.setRGB(x, y, pix);
+					bufferedImages.add(img);
+				}
+			}
+		}
+		return bufferedImages;
+	}
+	
 	public static void main(String args[]) {
 		System.out.println(frameBufferPointers.get(5999));
 	}

@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,16 +28,16 @@ public class AVPlayer {
 	JLabel lbIm2;
 
 
-	public List<byte[]> getAllFrames(String[] args) {
-		List<byte[]> framesList = null;
+	public List<BufferedImage> getAllFrames(String[] args) {
+		List<BufferedImage> buffImages = null;
 		try {
 			File file = new File(args[0]);
-			framesList = readIntoList(VideoConstant.VIDEO_PLAYER_WIDTH, VideoConstant.VIDEO_PLAYER_HEIGHT,
+			buffImages = readIntoList(VideoConstant.VIDEO_PLAYER_WIDTH, VideoConstant.VIDEO_PLAYER_HEIGHT,
 					file);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return framesList;
+		return buffImages;
 	}
 
 	private void displayVideo(String[] args, List<byte[]> framesList) {
@@ -105,18 +106,19 @@ public class AVPlayer {
 		frame.setVisible(true);
 	}
 
-	private List<byte[]> readIntoList(int width, int height, File file) throws IOException {
+	private List<BufferedImage> readIntoList(int width, int height, File file) throws IOException {
 		long len = width*height*3;
-		List<byte[]> byteList = new ArrayList<>();
+//		List<byte[]> byteList = new ArrayList<>();
 		RandomAccessFile f = new RandomAccessFile(file, "r");
-		byte[] bytes = new byte[(int) len];
-		System.out.println(f.getFilePointer());
-		while (f.getFilePointer() != f.length()) {
+		List<BufferedImage> bufferedImages = new ArrayList<>();
+		
+		while (f.getFilePointer() != f.length()/2) {
+			byte[] bytes = new byte[(int) len];
 			f.readFully(bytes);
-			System.out.println(f.getFilePointer());
-			byteList.add(bytes);
+//			byteList.add(bytes);
+			bufferedImages.add(getFrame(bytes));
 		}
-		return byteList;
+		return bufferedImages;
 	}
 
 	public void playWAV(String filename){
@@ -147,8 +149,10 @@ public class AVPlayer {
 			return;
 		}
 		AVPlayer ren = new AVPlayer();
-		ImageDisplayService outputDisplayService = new ImageDisplayService("DWT Output Image");
-		// List<byte[]> framesList = ren.getAllFrames(args);
+		ImageDisplayService outputDisplayService = new ImageDisplayService("Video Player");
+		
+		List<BufferedImage> buffImages = ren.getAllFrames(args);
+//		List<BufferedImage> buffImages = VideoIOUtil.getAllFrames(framesList);
 		// read 1st 1000 frames and display first and last frame for testing
 		Thread t = new Thread(new Runnable() {
 
@@ -161,15 +165,18 @@ public class AVPlayer {
 
 		t.start();
 		for (int i = 0; i < 6000; i++) {
-			byte[] frameBytes = VideoIOUtil.readFrameBuffer(new File(args[0]), i);
+			long currTime = System.nanoTime()/1000000;
+//			byte[] frameBytes = VideoIOUtil.readFrameBuffer(new File(args[0]), i);
+//			byte[] frameBytes = framesList.get(i);
 			// ren.displayVideo(args, framesList);
-			BufferedImage img = VideoIOUtil.getFrame(frameBytes);
+//			BufferedImage img = VideoIOUtil.getFrame(frameBytes);
+			
+			BufferedImage img = buffImages.get(i);
 			outputDisplayService.displayImage(img);
-			Thread.sleep(50);
+			Thread.sleep(45);
 			// ren.displayFrame(img, args);
-
+			System.out.println(System.nanoTime()/1000000 - currTime);
 		}
-
 		// ren.playWAV(args[1]);
 	}
 

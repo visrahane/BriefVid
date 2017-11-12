@@ -60,7 +60,6 @@ public class Sound {
 		}
 
 		startMusic(audioInputStream, dataLine);
-
 	}
 
 	private void startMusic(AudioInputStream audioInputStream, SourceDataLine dataLine) throws PlayWaveException {
