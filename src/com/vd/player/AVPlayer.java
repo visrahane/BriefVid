@@ -6,14 +6,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.SwingConstants;
 
+import com.vd.constants.VideoConstant;
 import com.vd.exception.PlayWaveException;
+import com.vd.io.VideoIOUtil;
 
 
 public class AVPlayer {
@@ -21,62 +24,60 @@ public class AVPlayer {
 	JFrame frame;
 	JLabel lbIm1;
 	JLabel lbIm2;
-	BufferedImage img;
 
-	public void initialize(String[] args){
-		int width = 352;
-		int height = 288;
 
-		img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-
+	public List<byte[]> getAllFrames(String[] args) {
+		List<byte[]> framesList = null;
 		try {
 			File file = new File(args[0]);
-			InputStream is = new FileInputStream(file);
-
-			//long len = file.length();
-			long len = width*height*3;
-			byte[] bytes = new byte[(int)len];
-
-			int offset = 0;
-			int numRead = 0;
-			while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
-				offset += numRead;
-			}
-
-
-			int ind = 0;
-			for(int y = 0; y < height; y++){
-
-				for(int x = 0; x < width; x++){
-
-					byte a = 0;
-					byte r = bytes[ind];
-					byte g = bytes[ind+height*width];
-					byte b = bytes[ind+height*width*2];
-
-					int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
-					//int pix = ((a << 24) + (r << 16) + (g << 8) + b);
-					img.setRGB(x,y,pix);
-					ind++;
-				}
-			}
-
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			framesList = readIntoList(VideoConstant.VIDEO_PLAYER_WIDTH, VideoConstant.VIDEO_PLAYER_HEIGHT,
+					file);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return framesList;
+	}
 
-		// Use labels to display the images
+	private void displayVideo(String[] args, List<byte[]> framesList) {
+		BufferedImage bufferedImage;
+		int count = 0;
+		for (byte[] bytes : framesList) {
+			bufferedImage = getFrame(bytes);
+			// bufferedImageList.add(bufferedImage);
+			if (count++ == 0 || count++ == 200) {
+				displayFrame(bufferedImage, args);
+			}
+		}
+	}
+
+	private BufferedImage getFrame(byte[] bytes) {
+		BufferedImage bufferedImage = new BufferedImage(VideoConstant.VIDEO_PLAYER_WIDTH,
+				VideoConstant.VIDEO_PLAYER_HEIGHT, BufferedImage.TYPE_INT_RGB);
+		for (int y = 0, ind = 0; y < bufferedImage.getHeight(); y++) {
+
+			for (int x = 0; x < bufferedImage.getWidth(); x++, ind++) {
+
+				byte r = bytes[ind];
+				byte g = bytes[ind + bufferedImage.getHeight() * bufferedImage.getWidth()];
+				byte b = bytes[ind + bufferedImage.getHeight() * bufferedImage.getWidth() * 2];
+
+				int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
+				bufferedImage.setRGB(x,y,pix);
+
+			}
+		}
+		return bufferedImage;
+	}
+
+	private void displayFrame(BufferedImage img, String[] args) {
 		frame = new JFrame();
 		GridBagLayout gLayout = new GridBagLayout();
 		frame.getContentPane().setLayout(gLayout);
 
 		JLabel lbText1 = new JLabel("Video: " + args[0]);
-		lbText1.setHorizontalAlignment(SwingConstants.LEFT);
+		// lbText1.setHorizontalAlignment(SwingConstants.LEFT);
 		JLabel lbText2 = new JLabel("Audio: " + args[1]);
-		lbText2.setHorizontalAlignment(SwingConstants.LEFT);
+		// lbText2.setHorizontalAlignment(SwingConstants.LEFT);
 		lbIm1 = new JLabel(new ImageIcon(img));
 
 		GridBagConstraints c = new GridBagConstraints();
@@ -101,8 +102,20 @@ public class AVPlayer {
 
 		frame.pack();
 		frame.setVisible(true);
+	}
 
-
+	private List<byte[]> readIntoList(int width, int height, File file) throws IOException {
+		long len = width*height*3;
+		List<byte[]> byteList = new ArrayList<>();
+		RandomAccessFile f = new RandomAccessFile(file, "r");
+		byte[] bytes = new byte[(int) len];
+		System.out.println(f.getFilePointer());
+		while (f.getFilePointer() != f.length()) {
+			f.readFully(bytes);
+			System.out.println(f.getFilePointer());
+			byteList.add(bytes);
+		}
+		return byteList;
 	}
 
 	public void playWAV(String filename){
@@ -133,7 +146,16 @@ public class AVPlayer {
 			return;
 		}
 		AVPlayer ren = new AVPlayer();
-		ren.initialize(args);
+		// List<byte[]> framesList = ren.getAllFrames(args);
+		// read 1st 1000 frames and display first and last frame for testing
+		for (int i = 0; i < 5000;) {
+			byte[] frameBytes = VideoIOUtil.readFrameBuffer(new File(args[0]), i);
+			// ren.displayVideo(args, framesList);
+			BufferedImage img = VideoIOUtil.getFrame(frameBytes);
+			ren.displayFrame(img, args);
+			i += 4999;
+		}
+
 		ren.playWAV(args[1]);
 	}
 
