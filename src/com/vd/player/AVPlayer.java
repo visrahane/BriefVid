@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +16,7 @@ import javax.swing.JLabel;
 
 import com.vd.constants.VideoConstant;
 import com.vd.exception.PlayWaveException;
-import com.vd.io.VideoIOUtil;
+import com.vd.models.Sound;
 import com.vd.services.ImageDisplayService;
 
 
@@ -26,7 +25,11 @@ public class AVPlayer {
 	JFrame frame;
 	JLabel lbIm1;
 	JLabel lbIm2;
+	Sound sound;
 
+	public AVPlayer(String args[]) {
+		initWAV(args[1]);
+	}
 
 	public List<BufferedImage> getAllFrames(String[] args) {
 		List<BufferedImage> buffImages = null;
@@ -108,20 +111,20 @@ public class AVPlayer {
 
 	private List<BufferedImage> readIntoList(int width, int height, File file) throws IOException {
 		long len = width*height*3;
-//		List<byte[]> byteList = new ArrayList<>();
+		//		List<byte[]> byteList = new ArrayList<>();
 		RandomAccessFile f = new RandomAccessFile(file, "r");
 		List<BufferedImage> bufferedImages = new ArrayList<>();
-		
+
 		while (f.getFilePointer() != f.length()/2) {
 			byte[] bytes = new byte[(int) len];
 			f.readFully(bytes);
-//			byteList.add(bytes);
+			//			byteList.add(bytes);
 			bufferedImages.add(getFrame(bytes));
 		}
 		return bufferedImages;
 	}
 
-	public void playWAV(String filename){
+	public void initWAV(String filename) {
 		// opens the inputStream
 		FileInputStream inputStream;
 		try {
@@ -132,11 +135,11 @@ public class AVPlayer {
 		}
 
 		// initializes the playSound Object
-		Sound playSound = new Sound(inputStream);
+		sound = new Sound(inputStream);
 
 		// plays the sound
 		try {
-			playSound.play();
+			sound.init();
 		} catch (PlayWaveException e) {
 			e.printStackTrace();
 			return;
@@ -148,32 +151,25 @@ public class AVPlayer {
 			System.err.println("usage: java -jar AVPlayer.jar [RGB file] [WAV file]");
 			return;
 		}
-		AVPlayer ren = new AVPlayer();
+		AVPlayer ren = new AVPlayer(args);
 		ImageDisplayService outputDisplayService = new ImageDisplayService("Video Player");
-		
+
 		List<BufferedImage> buffImages = ren.getAllFrames(args);
-//		List<BufferedImage> buffImages = VideoIOUtil.getAllFrames(framesList);
-		// read 1st 1000 frames and display first and last frame for testing
-		Thread t = new Thread(new Runnable() {
 
-			@Override
-			public void run() {
-				ren.playWAV(args[1]);
-			}
-
-		});
-
-		t.start();
+		// List<byte[]> audioFrames = ren.sound.getAudioBuffer();
+		//		List<BufferedImage> buffImages = VideoIOUtil.getAllFrames(framesList);
 		for (int i = 0; i < 6000; i++) {
 			long currTime = System.nanoTime()/1000000;
-//			byte[] frameBytes = VideoIOUtil.readFrameBuffer(new File(args[0]), i);
-//			byte[] frameBytes = framesList.get(i);
+			//			byte[] frameBytes = VideoIOUtil.readFrameBuffer(new File(args[0]), i);
+			//			byte[] frameBytes = framesList.get(i);
 			// ren.displayVideo(args, framesList);
-//			BufferedImage img = VideoIOUtil.getFrame(frameBytes);
-			
+			//			BufferedImage img = VideoIOUtil.getFrame(frameBytes);
+
 			BufferedImage img = buffImages.get(i);
 			outputDisplayService.displayImage(img);
-			Thread.sleep(45);
+
+			ren.sound.playMusicFrameByFrame(i);
+			// Thread.sleep();
 			// ren.displayFrame(img, args);
 			System.out.println(System.nanoTime()/1000000 - currTime);
 		}
