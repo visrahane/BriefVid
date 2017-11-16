@@ -2,21 +2,19 @@ package com.vd.player;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import com.vd.constants.VideoConstant;
-import com.vd.exception.PlayWaveException;
-import com.vd.io.VideoIOUtil;
+import com.vd.models.Video;
+import com.vd.runnable.VideoFrameBufferRunnable;
+import com.vd.services.ImageDisplayService;
+import com.vd.services.SoundService;
+import com.vd.util.VideoIOUtil;
 
 
 public class AVPlayer {
@@ -24,19 +22,7 @@ public class AVPlayer {
 	JFrame frame;
 	JLabel lbIm1;
 	JLabel lbIm2;
-
-
-	public List<byte[]> getAllFrames(String[] args) {
-		List<byte[]> framesList = null;
-		try {
-			File file = new File(args[0]);
-			framesList = readIntoList(VideoConstant.VIDEO_PLAYER_WIDTH, VideoConstant.VIDEO_PLAYER_HEIGHT,
-					file);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return framesList;
-	}
+	private SoundService soundService;
 
 	private void displayVideo(String[] args, List<byte[]> framesList) {
 		BufferedImage bufferedImage;
@@ -104,59 +90,66 @@ public class AVPlayer {
 		frame.setVisible(true);
 	}
 
-	private List<byte[]> readIntoList(int width, int height, File file) throws IOException {
-		long len = width*height*3;
-		List<byte[]> byteList = new ArrayList<>();
-		RandomAccessFile f = new RandomAccessFile(file, "r");
-		byte[] bytes = new byte[(int) len];
-		System.out.println(f.getFilePointer());
-		while (f.getFilePointer() != f.length()) {
-			f.readFully(bytes);
-			System.out.println(f.getFilePointer());
-			byteList.add(bytes);
-		}
-		return byteList;
-	}
 
-	public void playWAV(String filename){
-		// opens the inputStream
-		FileInputStream inputStream;
-		try {
-			inputStream = new FileInputStream(filename);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			return;
-		}
+	/*public static void main(String[] args) throws InterruptedException {
 
-		// initializes the playSound Object
-		Sound playSound = new Sound(inputStream);
-
-		// plays the sound
-		try {
-			playSound.play();
-		} catch (PlayWaveException e) {
-			e.printStackTrace();
-			return;
-		}
-	}
-
-	public static void main(String[] args) {
-		if (args.length < 2) {
-			System.err.println("usage: java -jar AVPlayer.jar [RGB file] [WAV file]");
-			return;
-		}
 		AVPlayer ren = new AVPlayer();
-		// List<byte[]> framesList = ren.getAllFrames(args);
-		// read 1st 1000 frames and display first and last frame for testing
-		for (int i = 0; i < 5000;) {
-			byte[] frameBytes = VideoIOUtil.readFrameBuffer(new File(args[0]), i);
-			// ren.displayVideo(args, framesList);
-			BufferedImage img = VideoIOUtil.getFrame(frameBytes);
-			ren.displayFrame(img, args);
-			i += 4999;
-		}
+		ImageDisplayService outputDisplayService = new ImageDisplayService("Video Player");
+		Video video = new Video(args[0], VideoConstant.VIDEO_PLAYER_HEIGHT, VideoConstant.VIDEO_PLAYER_WIDTH);
+		// List<BufferedImage> buffImages = ren.getAllFrames(args);
 
-		ren.playWAV(args[1]);
+		// List<byte[]> audioFrames = ren.sound.getAudioBuffer();
+		//		List<BufferedImage> buffImages = VideoIOUtil.getAllFrames(framesList);
+		for (int i = 0; i < 6000; i++) {
+			long currTime = System.nanoTime()/1000000;
+
+			// byte[] frameBytes = framesList.get(i);
+			// ren.displayVideo(args, framesList);
+			BufferedImage img = VideoIOUtil.getFrame(video.getFile(), i);
+
+			// BufferedImage img = buffImages.get(i);
+			outputDisplayService.displayImage(img);
+			// ren.sound.playMusicFrameByFrame(i);
+			// Thread.sleep();
+			// ren.displayFrame(img, args);
+			System.out.println(System.nanoTime()/1000000 - currTime);
+		}
+		// ren.playWAV(args[1]);
+	}*/
+
+	public void start(String[] args) {
+		soundService = new SoundService(args[1]);
+		Video video = new Video(args[0], VideoConstant.VIDEO_PLAYER_HEIGHT, VideoConstant.VIDEO_PLAYER_WIDTH);
+		ArrayBlockingQueue<BufferedImage> bufferQ = new ArrayBlockingQueue<>(
+				(int) VideoConstant.VIDEO_FRAME_BUFFER_LENGTH, true);
+		fillUpInitialBuffer(video, bufferQ);
+		startVideoFrameBufferProducer(video, bufferQ);
+		playVideoAudio(bufferQ);
+	}
+
+	private void playVideoAudio(ArrayBlockingQueue<BufferedImage> bufferQ) {
+		ImageDisplayService outputDisplayService = new ImageDisplayService("Video Player");
+		for (int i = 100; i < 6000; i++) {
+			long currTime = System.nanoTime() / 1000000;
+			try {
+				outputDisplayService.displayImage(bufferQ.take());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			soundService.playMusicFrameByFrame(i - 100);
+			System.out.println(i + ":" + (System.nanoTime() / 1000000 - currTime));
+		}
+	}
+
+	private void fillUpInitialBuffer(Video video, ArrayBlockingQueue<BufferedImage> bufferQ) {
+		for (int i = 0; i < 100; i++) {
+			bufferQ.add(VideoIOUtil.getFrame(video.getFile(), i));
+		}
+	}
+
+	private void startVideoFrameBufferProducer(Video video, ArrayBlockingQueue<BufferedImage> bufferQ) {
+		Thread t = new Thread(new VideoFrameBufferRunnable(bufferQ, video));
+		t.start();
 	}
 
 }
