@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vd.constants.VideoConstant;
+import com.vd.models.Video;
 
 /**
  * @author Vis
@@ -27,7 +28,7 @@ public class VideoIOUtil {
 		}
 	}
 
-	public static byte[] readFrameBuffer(File file, int frameNo) {
+	public static BufferedImage getFrame(File file, int frameNo) {
 		byte[] bytes = new byte[(int) VideoConstant.VIDEO_FRAME_SIZE];
 		RandomAccessFile randomAccessFile = null;
 		try {
@@ -38,7 +39,7 @@ public class VideoIOUtil {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return bytes;
+		return getFrame(bytes);
 	}
 
 	public static BufferedImage getFrame(byte[] bytes) {
@@ -58,6 +59,25 @@ public class VideoIOUtil {
 			}
 		}
 		return bufferedImage;
+	}
+
+	public static List<BufferedImage> getFrameBuffer(Video video, int startFrameNo) {
+		List<BufferedImage> buffImages = new ArrayList<>(1);
+		try {
+			buffImages = readBufferedImages(video.getFile(), startFrameNo);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return buffImages;
+	}
+
+	private static List<BufferedImage> readBufferedImages(File file,int startFrameNo) throws IOException {
+		RandomAccessFile f = new RandomAccessFile(file, "r");
+		List<BufferedImage> bufferedImages = new ArrayList<>();
+		for (int i = startFrameNo; i < startFrameNo + VideoConstant.VIDEO_FRAME_BUFFER_LENGTH; i++) {
+			bufferedImages.add(getFrame(file, i));
+		}
+		return bufferedImages;
 	}
 
 	public static void main(String args[]) {
