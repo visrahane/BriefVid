@@ -33,8 +33,5 @@ public class VideoFrameBufferRunnable implements Runnable {
 				e.printStackTrace();
 			}
 		}
-
-
 	}
-
 }

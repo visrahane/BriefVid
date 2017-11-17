@@ -129,14 +129,14 @@ public class AVPlayer {
 
 	private void playVideoAudio(ArrayBlockingQueue<BufferedImage> bufferQ) {
 		ImageDisplayService outputDisplayService = new ImageDisplayService("Video Player");
-		for (int i = 100; i < 6000; i++) {
+		for (int i = 0; i < 6000; i++) {
 			long currTime = System.nanoTime() / 1000000;
 			try {
 				outputDisplayService.displayImage(bufferQ.take());
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			soundService.playMusicFrameByFrame(i - 100);
+			soundService.playMusicFrameByFrame(i);
 			System.out.println(i + ":" + (System.nanoTime() / 1000000 - currTime));
 		}
 	}

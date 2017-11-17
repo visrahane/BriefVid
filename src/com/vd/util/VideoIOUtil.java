@@ -23,7 +23,7 @@ public class VideoIOUtil {
 
 	static {
 		frameBufferPointers = new ArrayList<>();
-		for (long i = 0; i < VideoConstant.VIDEO_BUFFER_COUNT; i++) {
+		for (long i = 0; i < VideoConstant.VIDEO_FRAME_COUNT; i++) {
 			frameBufferPointers.add(i * VideoConstant.VIDEO_FRAME_SIZE);
 		}
 	}
