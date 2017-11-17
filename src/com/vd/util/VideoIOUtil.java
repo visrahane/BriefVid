@@ -80,6 +80,29 @@ public class VideoIOUtil {
 		return bufferedImages;
 	}
 
+	public static BufferedImage mergeImages(List<BufferedImage> buffImages) {
+		// Initializing the final image
+		BufferedImage finalImg = new BufferedImage(VideoConstant.VIDEO_PLAYER_WIDTH * buffImages.size(),
+				buffImages.get(0).getHeight(), buffImages.get(0).getType());
+
+		int num = 0;
+		for (int i = 0; i < 1; i++) {
+			for (int j = 0; j < buffImages.size(); j++, num++) {
+				finalImg.createGraphics().drawImage(buffImages.get(num), VideoConstant.VIDEO_PLAYER_WIDTH * j,
+						buffImages.get(0).getHeight() * i, null);
+
+			}
+		}
+		System.out.println("Image concatenated.....");
+		/*
+		 * try { ImageIO.write(finalImg, "jpeg", new File("finalImg.jpg")); }
+		 * catch (IOException e) { // TODO Auto-generated catch block
+		 * e.printStackTrace(); }
+		 */
+		return finalImg;
+
+	}
+
 	public static void main(String args[]) {
 		System.out.println(frameBufferPointers.get(5999));
 	}
