@@ -1,7 +1,10 @@
 package com.vd.player;
+
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -133,6 +136,11 @@ public class AVPlayer {
 			ArrayBlockingQueue<BufferedImage> availableResourcesQ) {
 		ImageDisplayService outputDisplayService = new ImageDisplayService("Video Player");
 		BufferedImage take;
+
+		List<BufferedImage> tapestry = new ArrayList<>();
+		tapestry.add((bufferQ.peek()));
+		tapestry.add((bufferQ.peek()));
+		outputDisplayService.displayTapestry(VideoIOUtil.mergeImages(tapestry));
 		for (int i = 0; i < VideoConstant.VIDEO_FRAME_COUNT; i++) {
 			long currTime = System.nanoTime() / 1000000;
 			try {
@@ -158,5 +166,40 @@ public class AVPlayer {
 		Thread t = new Thread(new VideoFrameBufferRunnable(bufferQ, video, availableResourcesQ));
 		t.start();
 	}
+
+
+	/*public static void main(String[] args) {
+		if (args.length < 2) {
+			System.err.println("usage: java -jar AVPlayer.jar [RGB file] [WAV file]");
+			return;
+		}
+		AVPlayer ren = new AVPlayer();
+		// List<byte[]> framesList = ren.getAllFrames(args);
+		// read 1st 1000 frames and display first and last frame for testing
+		List<BufferedImage> buffImages = new ArrayList<>(2);
+		for (int i = 0; i < 5000;) {
+			byte[] frameBytes = VideoIOUtil.readFrameBuffer(new File(args[0]), i);
+			// ren.displayVideo(args, framesList);
+			BufferedImage img = VideoIOUtil.getFrame(frameBytes);
+			buffImages.add(img);
+			// ren.displayFrame(img, args);
+			i += 4999;
+		}
+		BufferedImage intermediateImg =  (mergeImages(buffImages));
+
+		ren.displayFrame(mergeImagesUsingPixel(intermediateImg), args);
+		ren.playWAV(args[1]);
+	}*/
+
+	private static int getAvg(int rgb1, int rgb2) {
+		Color c1 = new Color(rgb1);
+		Color c2 = new Color(rgb2);
+		int red = (c1.getRed() + c2.getRed()) / 2;
+		int blue = (c1.getBlue() + c2.getBlue()) / 2;
+		int green = (c1.getGreen() + c2.getGreen()) / 2;
+		Color c3 = new Color(red, blue, green);
+		return c3.getRGB();
+	}
+
 
 }
