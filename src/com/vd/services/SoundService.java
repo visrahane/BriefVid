@@ -35,6 +35,10 @@ public class SoundService {
 
 	private List<byte[]> audioFrames;
 
+	public byte[] getAudioFrame(int index) {
+		return audioFrames.get(index);
+	}
+
 	public SoundService(String fileName) {
 		prepareAudioInputStream(fileName);
 		// Obtain the information about the AudioInputStream

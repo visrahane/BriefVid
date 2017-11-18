@@ -29,6 +29,14 @@ public class VideoIOUtil {
 	}
 
 	public static BufferedImage getFrame(File file, int frameNo) {
+		return getFrame(getFrameBytes(file, frameNo));
+	}
+
+	public static BufferedImage getFrame(File file, int frameNo, BufferedImage bufferedImage) {
+		return getFrame(getFrameBytes(file, frameNo), bufferedImage);
+	}
+
+	public static byte[] getFrameBytes(File file, int frameNo) {
 		byte[] bytes = new byte[(int) VideoConstant.VIDEO_FRAME_SIZE];
 		RandomAccessFile randomAccessFile = null;
 		try {
@@ -39,12 +47,10 @@ public class VideoIOUtil {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return getFrame(bytes);
+		return bytes;
 	}
 
-	public static BufferedImage getFrame(byte[] bytes) {
-		BufferedImage bufferedImage = new BufferedImage(VideoConstant.VIDEO_PLAYER_WIDTH,
-				VideoConstant.VIDEO_PLAYER_HEIGHT, BufferedImage.TYPE_INT_RGB);
+	public static BufferedImage getFrame(byte[] bytes, BufferedImage bufferedImage) {
 		for (int y = 0, ind = 0; y < bufferedImage.getHeight(); y++) {
 
 			for (int x = 0; x < bufferedImage.getWidth(); x++, ind++) {
@@ -59,6 +65,12 @@ public class VideoIOUtil {
 			}
 		}
 		return bufferedImage;
+	}
+
+	public static BufferedImage getFrame(byte[] bytes) {
+		BufferedImage bufferedImage = new BufferedImage(VideoConstant.VIDEO_PLAYER_WIDTH,
+				VideoConstant.VIDEO_PLAYER_HEIGHT, BufferedImage.TYPE_INT_RGB);
+		return getFrame(bytes, bufferedImage);
 	}
 
 	public static List<BufferedImage> getFrameBuffer(Video video, int startFrameNo) {

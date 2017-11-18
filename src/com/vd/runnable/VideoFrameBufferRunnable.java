@@ -6,6 +6,7 @@ package com.vd.runnable;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import com.vd.constants.VideoConstant;
 import com.vd.models.Video;
 import com.vd.util.VideoIOUtil;
 
@@ -19,15 +20,19 @@ public class VideoFrameBufferRunnable implements Runnable {
 
 	private Video video;
 
-	public VideoFrameBufferRunnable(ArrayBlockingQueue<BufferedImage> bufferQ, Video video) {
+	private ArrayBlockingQueue<BufferedImage> availableResourcesQ;
+
+	public VideoFrameBufferRunnable(ArrayBlockingQueue<BufferedImage> bufferQ, Video video,
+			ArrayBlockingQueue<BufferedImage> availableResourcesQ) {
 		this.bufferQ = bufferQ;
+		this.availableResourcesQ = availableResourcesQ;
 		this.video = video;
 	}
 	@Override
 	public void run() {
-		for (int i = 100; i < 6000; i++) {
+		for (int i = VideoConstant.VIDEO_FRAME_BUFFER_LENGTH; i < VideoConstant.VIDEO_FRAME_COUNT; i++) {
 			try {
-				bufferQ.put(VideoIOUtil.getFrame(video.getFile(), i));
+				bufferQ.put(VideoIOUtil.getFrame(video.getFile(), i, availableResourcesQ.take()));
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

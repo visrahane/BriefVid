@@ -121,18 +121,24 @@ public class AVPlayer {
 		soundService = new SoundService(args[1]);
 		Video video = new Video(args[0], VideoConstant.VIDEO_PLAYER_HEIGHT, VideoConstant.VIDEO_PLAYER_WIDTH);
 		ArrayBlockingQueue<BufferedImage> bufferQ = new ArrayBlockingQueue<>(
-				(int) VideoConstant.VIDEO_FRAME_BUFFER_LENGTH, true);
+				VideoConstant.VIDEO_FRAME_BUFFER_LENGTH, true);
+		ArrayBlockingQueue<BufferedImage> availableResourcesQ = new ArrayBlockingQueue<>(
+				VideoConstant.VIDEO_FRAME_BUFFER_LENGTH, true);
 		fillUpInitialBuffer(video, bufferQ);
-		startVideoFrameBufferProducer(video, bufferQ);
-		playVideoAudio(bufferQ);
+		startVideoFrameBufferProducer(video, bufferQ, availableResourcesQ);
+		playVideoAudio(bufferQ, availableResourcesQ);
 	}
 
-	private void playVideoAudio(ArrayBlockingQueue<BufferedImage> bufferQ) {
+	private void playVideoAudio(ArrayBlockingQueue<BufferedImage> bufferQ,
+			ArrayBlockingQueue<BufferedImage> availableResourcesQ) {
 		ImageDisplayService outputDisplayService = new ImageDisplayService("Video Player");
-		for (int i = 0; i < 6000; i++) {
+		BufferedImage take;
+		for (int i = 0; i < VideoConstant.VIDEO_FRAME_COUNT; i++) {
 			long currTime = System.nanoTime() / 1000000;
 			try {
-				outputDisplayService.displayImage(bufferQ.take());
+				take = bufferQ.take();
+				outputDisplayService.displayImage(take);
+				availableResourcesQ.put(take);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -142,13 +148,14 @@ public class AVPlayer {
 	}
 
 	private void fillUpInitialBuffer(Video video, ArrayBlockingQueue<BufferedImage> bufferQ) {
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < VideoConstant.VIDEO_FRAME_BUFFER_LENGTH; i++) {
 			bufferQ.add(VideoIOUtil.getFrame(video.getFile(), i));
 		}
 	}
 
-	private void startVideoFrameBufferProducer(Video video, ArrayBlockingQueue<BufferedImage> bufferQ) {
-		Thread t = new Thread(new VideoFrameBufferRunnable(bufferQ, video));
+	private void startVideoFrameBufferProducer(Video video, ArrayBlockingQueue<BufferedImage> bufferQ,
+			ArrayBlockingQueue<BufferedImage> availableResourcesQ) {
+		Thread t = new Thread(new VideoFrameBufferRunnable(bufferQ, video, availableResourcesQ));
 		t.start();
 	}
 
