@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -15,7 +14,7 @@ import javax.swing.JLabel;
 import com.vd.constants.VideoConstant;
 import com.vd.models.Video;
 import com.vd.runnable.VideoFrameBufferRunnable;
-import com.vd.services.ImageDisplayService;
+import com.vd.services.GUI;
 import com.vd.services.SoundService;
 import com.vd.util.VideoIOUtil;
 
@@ -26,6 +25,24 @@ public class AVPlayer {
 	JLabel lbIm1;
 	JLabel lbIm2;
 	private SoundService soundService;
+	private Video video;
+	private VideoFrameBufferRunnable videoFrameBufferRunnable;
+
+	private ArrayBlockingQueue<BufferedImage> bufferQ = new ArrayBlockingQueue<>(
+			VideoConstant.VIDEO_FRAME_BUFFER_LENGTH, true);
+
+	private ArrayBlockingQueue<BufferedImage> availableResourcesQ = new ArrayBlockingQueue<>(
+			VideoConstant.VIDEO_FRAME_BUFFER_LENGTH, true);
+
+	public AVPlayer() {
+		video = new Video(VideoConstant.VIDEO_PLAYER_HEIGHT, VideoConstant.VIDEO_PLAYER_WIDTH);
+	}
+
+	public AVPlayer(String[] args) {
+		video = new Video(args[0], VideoConstant.VIDEO_PLAYER_HEIGHT, VideoConstant.VIDEO_PLAYER_WIDTH);
+		soundService = new SoundService(args[1]);
+		videoFrameBufferRunnable = new VideoFrameBufferRunnable(bufferQ, video, availableResourcesQ);
+	}
 
 	private void displayVideo(String[] args, List<byte[]> framesList) {
 		BufferedImage bufferedImage;
@@ -120,27 +137,26 @@ public class AVPlayer {
 		// ren.playWAV(args[1]);
 	}*/
 
-	public void start(String[] args) {
-		soundService = new SoundService(args[1]);
-		Video video = new Video(args[0], VideoConstant.VIDEO_PLAYER_HEIGHT, VideoConstant.VIDEO_PLAYER_WIDTH);
-		ArrayBlockingQueue<BufferedImage> bufferQ = new ArrayBlockingQueue<>(
-				VideoConstant.VIDEO_FRAME_BUFFER_LENGTH, true);
-		ArrayBlockingQueue<BufferedImage> availableResourcesQ = new ArrayBlockingQueue<>(
-				VideoConstant.VIDEO_FRAME_BUFFER_LENGTH, true);
-		fillUpInitialBuffer(video, bufferQ);
-		startVideoFrameBufferProducer(video, bufferQ, availableResourcesQ);
-		playVideoAudio(bufferQ, availableResourcesQ);
+	public void start() {
+		fillUpInitialBuffer();
+		startVideoFrameBufferProducer();
+		// playVideoAudio();
 	}
 
-	private void playVideoAudio(ArrayBlockingQueue<BufferedImage> bufferQ,
-			ArrayBlockingQueue<BufferedImage> availableResourcesQ) {
-		ImageDisplayService outputDisplayService = new ImageDisplayService("Video Player");
-		BufferedImage take;
+	public BufferedImage getCurrentPlayedFrame(BufferedImage take) {
+		try {
+			take = bufferQ.take();
+			// outputDisplayService.displayImage(take);
+			// availableResourcesQ.put(take);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return take;
+	}
 
-		List<BufferedImage> tapestry = new ArrayList<>();
-		tapestry.add((bufferQ.peek()));
-		tapestry.add((bufferQ.peek()));
-		outputDisplayService.displayTapestry(VideoIOUtil.mergeImages(tapestry));
+	public void playVideoAudio(GUI outputDisplayService) {
+		start();
+		BufferedImage take;
 		for (int i = 0; i < VideoConstant.VIDEO_FRAME_COUNT; i++) {
 			long currTime = System.nanoTime() / 1000000;
 			try {
@@ -155,15 +171,20 @@ public class AVPlayer {
 		}
 	}
 
-	private void fillUpInitialBuffer(Video video, ArrayBlockingQueue<BufferedImage> bufferQ) {
-		for (int i = 0; i < VideoConstant.VIDEO_FRAME_BUFFER_LENGTH; i++) {
+	private void fillUpInitialBuffer() {
+		int hundredFramesAhead = video.getCurrentFramePtr()
+				+ VideoConstant.VIDEO_FRAME_BUFFER_LENGTH;
+		bufferQ.clear();
+		availableResourcesQ.clear();
+		int i = video.getCurrentFramePtr();
+		for (; i < hundredFramesAhead && i < VideoConstant.VIDEO_FRAME_COUNT; i++) {
 			bufferQ.add(VideoIOUtil.getFrame(video.getFile(), i));
 		}
+		// video.setCurrentFramePtr(i);
 	}
 
-	private void startVideoFrameBufferProducer(Video video, ArrayBlockingQueue<BufferedImage> bufferQ,
-			ArrayBlockingQueue<BufferedImage> availableResourcesQ) {
-		Thread t = new Thread(new VideoFrameBufferRunnable(bufferQ, video, availableResourcesQ));
+	private void startVideoFrameBufferProducer() {
+		Thread t = new Thread(videoFrameBufferRunnable);
 		t.start();
 	}
 
@@ -201,5 +222,29 @@ public class AVPlayer {
 		return c3.getRGB();
 	}
 
+	public Video getVideo() {
+		return video;
+	}
+
+	public void setVideo(Video video) {
+		this.video = video;
+	}
+
+	public void playSoundFrame(int i) {
+		soundService.playMusicFrameByFrame(i);
+	}
+
+	public void putIntoAvailableResources(BufferedImage take) {
+		try {
+			availableResourcesQ.put(take);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void stopBufferThread() {
+		videoFrameBufferRunnable.toggleStop();
+	}
 
 }
