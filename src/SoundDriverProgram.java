@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.vd.services.ImageDisplayService;
+import com.vd.services.GUI;
 import com.vd.services.SoundService;
 import com.vd.util.VideoIOUtil;
 
@@ -23,10 +23,10 @@ public class SoundDriverProgram {
 	 * @param args
 	 */
 	public static final File VIDEO_FILE = new File(
-			"R:/Study/Masters/Fall 2017/CSCI-576 Multimedia/Project/CS576_Project_Videos/USCWeek.rgb");
+			"R:/Study/Masters/Fall 2017/CSCI-576 Multimedia/Project/CS576_Project_Videos/Apple.rgb");
 
 	public static final File AUDIO_FILE = new File(
-			"R:/Study/Masters/Fall 2017/CSCI-576 Multimedia/Project/CS576_Project_Videos/USCWeek.wav");
+			"R:/Study/Masters/Fall 2017/CSCI-576 Multimedia/Project/CS576_Project_Videos/Apple.wav");
 
 	public static void main(String[] args) {
 		// outputAudioBytesToFile();
@@ -65,10 +65,10 @@ public class SoundDriverProgram {
 	}
 
 	private static void displayGrpOfFrames(List<Integer> framesIndex, int start, int end) {
-		ImageDisplayService ids;
+		GUI ids;
 
 		for (int i = start; i < end; i++) {
-			ids = new ImageDisplayService("" + i);
+			ids = new GUI("TestUI", new String[] { VIDEO_FILE.getAbsolutePath(), AUDIO_FILE.getAbsolutePath() });
 			// soundService.playMusicFrameByFrame(i);
 			ids.displayImage(VideoIOUtil.getFrame(VIDEO_FILE, framesIndex.get(i)));
 		}
