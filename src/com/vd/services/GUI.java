@@ -4,6 +4,7 @@
 package com.vd.services;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
 
@@ -14,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.SwingUtilities;
 
 import com.vd.constants.VideoConstant;
 import com.vd.gui.listeners.ButtonPlayActionListener;
@@ -52,6 +54,7 @@ public class GUI {
 		frame.getContentPane().setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
 
 		videoPanel = new JPanel();
+		videoPanel.setPreferredSize(new Dimension(500, 330));
 		frame.getContentPane().add(videoPanel);
 
 		lblVideoDisplay = new JLabel();
@@ -211,7 +214,13 @@ public class GUI {
 		// stopAllThreads
 		pausePlay();
 		avPlayer.getVideo().setCurrentFramePtr(0);
-		resetGUI();
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				resetGUI();
+			}
+		});
+
 	}
 
 	private void resetGUI() {

@@ -146,6 +146,7 @@ public class AVPlayer {
 	public BufferedImage getCurrentPlayedFrame(BufferedImage take) {
 		try {
 			take = bufferQ.take();
+			// System.out.println("BQ:" + bufferQ.size());
 			// outputDisplayService.displayImage(take);
 			// availableResourcesQ.put(take);
 		} catch (InterruptedException e) {
@@ -184,8 +185,8 @@ public class AVPlayer {
 	}
 
 	private void startVideoFrameBufferProducer() {
-		Thread t = new Thread(videoFrameBufferRunnable);
-		t.start();
+		videoFrameBufferRunnable = new VideoFrameBufferRunnable(bufferQ, video, availableResourcesQ);
+		videoFrameBufferRunnable.start();
 	}
 
 
@@ -237,6 +238,7 @@ public class AVPlayer {
 	public void putIntoAvailableResources(BufferedImage take) {
 		try {
 			availableResourcesQ.put(take);
+			// System.out.println("AQ size:" + availableResourcesQ.size());
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -245,6 +247,16 @@ public class AVPlayer {
 
 	public void stopBufferThread() {
 		videoFrameBufferRunnable.toggleStop();
+		try {
+			// to unblock the frame thread
+			if (bufferQ.size() != 0) {
+				availableResourcesQ.put(bufferQ.take());
+			}
+			videoFrameBufferRunnable.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
