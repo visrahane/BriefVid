@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import com.vd.constants.VideoConstant;
 import com.vd.player.AVPlayer;
 import com.vd.services.GUI;
+import com.vd.videoprocessing.Histogram;
 
 /**
  * @author Vis
@@ -31,9 +32,21 @@ public class VideoRunnable extends Thread {
 		AVPlayer avPlayer = gui.getAvPlayer();
 		avPlayer.start();
 		BufferedImage take = null;
+		
+		// testing histogram
+		BufferedImage curr = null, next = null;
+		
 		int i;
 		for (i = avPlayer.getVideo().getCurrentFramePtr(); i < VideoConstant.VIDEO_FRAME_COUNT && !stop; i++) {
-			take = avPlayer.getCurrentPlayedFrame(take);
+			take = avPlayer.getCurrentPlayedFrame();
+			
+			// testing histogram
+			if(i == 0)
+				curr = take;
+			if(i == 1)
+				next = take;
+			
+			
 			gui.displayImage(take);
 			gui.updateSlider(100 * i / 6000);
 			avPlayer.putIntoAvailableResources(take);
@@ -41,6 +54,7 @@ public class VideoRunnable extends Thread {
 		}
 		avPlayer.getVideo().setCurrentFramePtr(i);
 		toggleStop();
+		System.out.println("hist diff: " + Histogram.getColorHistogramSAD(curr, next));
 	}
 
 	public void toggleStop() {

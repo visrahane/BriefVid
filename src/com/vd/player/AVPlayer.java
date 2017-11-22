@@ -143,7 +143,8 @@ public class AVPlayer {
 		// playVideoAudio();
 	}
 
-	public BufferedImage getCurrentPlayedFrame(BufferedImage take) {
+	public BufferedImage getCurrentPlayedFrame() {
+		BufferedImage take = null;
 		try {
 			take = bufferQ.take();
 			// System.out.println("BQ:" + bufferQ.size());
