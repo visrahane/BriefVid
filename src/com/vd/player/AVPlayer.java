@@ -1,4 +1,6 @@
 package com.vd.player;
+
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.image.BufferedImage;
@@ -12,7 +14,7 @@ import javax.swing.JLabel;
 import com.vd.constants.VideoConstant;
 import com.vd.models.Video;
 import com.vd.runnable.VideoFrameBufferRunnable;
-import com.vd.services.ImageDisplayService;
+import com.vd.services.GUI;
 import com.vd.services.SoundService;
 import com.vd.util.VideoIOUtil;
 
@@ -23,6 +25,24 @@ public class AVPlayer {
 	JLabel lbIm1;
 	JLabel lbIm2;
 	private SoundService soundService;
+	private Video video;
+	private VideoFrameBufferRunnable videoFrameBufferRunnable;
+
+	private ArrayBlockingQueue<BufferedImage> bufferQ = new ArrayBlockingQueue<>(
+			VideoConstant.VIDEO_FRAME_BUFFER_LENGTH, true);
+
+	private ArrayBlockingQueue<BufferedImage> availableResourcesQ = new ArrayBlockingQueue<>(
+			VideoConstant.VIDEO_FRAME_BUFFER_LENGTH, true);
+
+	public AVPlayer() {
+		video = new Video(VideoConstant.VIDEO_PLAYER_HEIGHT, VideoConstant.VIDEO_PLAYER_WIDTH);
+	}
+
+	public AVPlayer(String[] args) {
+		video = new Video(args[0], VideoConstant.VIDEO_PLAYER_HEIGHT, VideoConstant.VIDEO_PLAYER_WIDTH);
+		soundService = new SoundService(args[1]);
+		videoFrameBufferRunnable = new VideoFrameBufferRunnable(bufferQ, video, availableResourcesQ);
+	}
 
 	private void displayVideo(String[] args, List<byte[]> framesList) {
 		BufferedImage bufferedImage;
@@ -117,21 +137,26 @@ public class AVPlayer {
 		// ren.playWAV(args[1]);
 	}*/
 
-	public void start(String[] args) {
-		soundService = new SoundService(args[1]);
-		Video video = new Video(args[0], VideoConstant.VIDEO_PLAYER_HEIGHT, VideoConstant.VIDEO_PLAYER_WIDTH);
-		ArrayBlockingQueue<BufferedImage> bufferQ = new ArrayBlockingQueue<>(
-				VideoConstant.VIDEO_FRAME_BUFFER_LENGTH, true);
-		ArrayBlockingQueue<BufferedImage> availableResourcesQ = new ArrayBlockingQueue<>(
-				VideoConstant.VIDEO_FRAME_BUFFER_LENGTH, true);
-		fillUpInitialBuffer(video, bufferQ);
-		startVideoFrameBufferProducer(video, bufferQ, availableResourcesQ);
-		playVideoAudio(bufferQ, availableResourcesQ);
+	public void start() {
+		fillUpInitialBuffer();
+		startVideoFrameBufferProducer();
+		// playVideoAudio();
 	}
 
-	private void playVideoAudio(ArrayBlockingQueue<BufferedImage> bufferQ,
-			ArrayBlockingQueue<BufferedImage> availableResourcesQ) {
-		ImageDisplayService outputDisplayService = new ImageDisplayService("Video Player");
+	public BufferedImage getCurrentPlayedFrame(BufferedImage take) {
+		try {
+			take = bufferQ.take();
+			// System.out.println("BQ:" + bufferQ.size());
+			// outputDisplayService.displayImage(take);
+			// availableResourcesQ.put(take);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return take;
+	}
+
+	public void playVideoAudio(GUI outputDisplayService) {
+		start();
 		BufferedImage take;
 		for (int i = 0; i < VideoConstant.VIDEO_FRAME_COUNT; i++) {
 			long currTime = System.nanoTime() / 1000000;
@@ -147,16 +172,91 @@ public class AVPlayer {
 		}
 	}
 
-	private void fillUpInitialBuffer(Video video, ArrayBlockingQueue<BufferedImage> bufferQ) {
-		for (int i = 0; i < VideoConstant.VIDEO_FRAME_BUFFER_LENGTH; i++) {
+	private void fillUpInitialBuffer() {
+		int hundredFramesAhead = video.getCurrentFramePtr()
+				+ VideoConstant.VIDEO_FRAME_BUFFER_LENGTH;
+		bufferQ.clear();
+		availableResourcesQ.clear();
+		int i = video.getCurrentFramePtr();
+		for (; i < hundredFramesAhead && i < VideoConstant.VIDEO_FRAME_COUNT; i++) {
 			bufferQ.add(VideoIOUtil.getFrame(video.getFile(), i));
+		}
+		// video.setCurrentFramePtr(i);
+	}
+
+	private void startVideoFrameBufferProducer() {
+		videoFrameBufferRunnable = new VideoFrameBufferRunnable(bufferQ, video, availableResourcesQ);
+		videoFrameBufferRunnable.start();
+	}
+
+
+	/*public static void main(String[] args) {
+		if (args.length < 2) {
+			System.err.println("usage: java -jar AVPlayer.jar [RGB file] [WAV file]");
+			return;
+		}
+		AVPlayer ren = new AVPlayer();
+		// List<byte[]> framesList = ren.getAllFrames(args);
+		// read 1st 1000 frames and display first and last frame for testing
+		List<BufferedImage> buffImages = new ArrayList<>(2);
+		for (int i = 0; i < 5000;) {
+			byte[] frameBytes = VideoIOUtil.readFrameBuffer(new File(args[0]), i);
+			// ren.displayVideo(args, framesList);
+			BufferedImage img = VideoIOUtil.getFrame(frameBytes);
+			buffImages.add(img);
+			// ren.displayFrame(img, args);
+			i += 4999;
+		}
+		BufferedImage intermediateImg =  (mergeImages(buffImages));
+
+		ren.displayFrame(mergeImagesUsingPixel(intermediateImg), args);
+		ren.playWAV(args[1]);
+	}*/
+
+	private static int getAvg(int rgb1, int rgb2) {
+		Color c1 = new Color(rgb1);
+		Color c2 = new Color(rgb2);
+		int red = (c1.getRed() + c2.getRed()) / 2;
+		int blue = (c1.getBlue() + c2.getBlue()) / 2;
+		int green = (c1.getGreen() + c2.getGreen()) / 2;
+		Color c3 = new Color(red, blue, green);
+		return c3.getRGB();
+	}
+
+	public Video getVideo() {
+		return video;
+	}
+
+	public void setVideo(Video video) {
+		this.video = video;
+	}
+
+	public void playSoundFrame(int i) {
+		soundService.playMusicFrameByFrame(i);
+	}
+
+	public void putIntoAvailableResources(BufferedImage take) {
+		try {
+			availableResourcesQ.put(take);
+			// System.out.println("AQ size:" + availableResourcesQ.size());
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
-	private void startVideoFrameBufferProducer(Video video, ArrayBlockingQueue<BufferedImage> bufferQ,
-			ArrayBlockingQueue<BufferedImage> availableResourcesQ) {
-		Thread t = new Thread(new VideoFrameBufferRunnable(bufferQ, video, availableResourcesQ));
-		t.start();
+	public void stopBufferThread() {
+		videoFrameBufferRunnable.toggleStop();
+		try {
+			// to unblock the frame thread
+			if (bufferQ.size() != 0) {
+				availableResourcesQ.put(bufferQ.take());
+			}
+			videoFrameBufferRunnable.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

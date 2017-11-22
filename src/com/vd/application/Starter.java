@@ -3,7 +3,7 @@
  */
 package com.vd.application;
 
-import com.vd.player.AVPlayer;
+import com.vd.services.GUI;
 
 /**
  * @author Vis
@@ -19,8 +19,9 @@ public class Starter {
 			System.err.println("usage: java -jar AVPlayer.jar [RGB file] [WAV file]");
 			return;
 		}
-		AVPlayer player = new AVPlayer();
-		player.start(args);
+		GUI gui = new GUI("CSCI-576", args);
+		// AVPlayer player = new AVPlayer();
+		// player.start(args);
 	}
 
 }
