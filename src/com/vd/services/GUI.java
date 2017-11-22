@@ -44,7 +44,6 @@ public class GUI {
 	private JProgressBar progressBar;
 
 	private JButton btnPlay;
-	private Boolean defaultSlide;
 
 	public GUI(String title, String[] args) {
 		frame.setTitle(title);
@@ -71,8 +70,9 @@ public class GUI {
 		btnPlay.setIcon(null);
 		btnPlay.setText("Play");
 		btnPlay.addActionListener(new ButtonPlayActionListener(this));
-
+		sliderPanel.setBackground(Color.gray);
 		sliderPanel.add(btnPlay);
+
 
 		JButton btnStop = new JButton();
 		btnStop.setIcon(null);
@@ -81,10 +81,13 @@ public class GUI {
 		sliderPanel.add(btnStop);
 
 		progressBar = new JProgressBar(0, 100);
+		progressBar.setStringPainted(true);
 		sliderPanel.add(progressBar);
 		progressBar.addMouseListener(new VideoSliderChangeListener(this));
 
 		bottomPanel = new JPanel();
+		bottomPanel.setPreferredSize(new Dimension(500, 330));
+		bottomPanel.setBackground(Color.black);
 		frame.getContentPane().add(bottomPanel);
 
 		lblTapestryDisplay = new JLabel();
@@ -230,17 +233,8 @@ public class GUI {
 	}
 
 	public void updateSlider(int n) {
-		defaultSlide = false;
 		progressBar.setValue(n);
-		defaultSlide = true;
-	}
-
-	public Boolean getDefaultSlide() {
-		return defaultSlide;
-	}
-
-	public void setDefaultSlide(Boolean defaultSlide) {
-		this.defaultSlide = defaultSlide;
+		progressBar.setString(n + "%");
 	}
 
 }
