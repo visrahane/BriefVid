@@ -3,12 +3,16 @@
  */
 package com.vd.util;
 
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import com.vd.constants.VideoConstant;
 import com.vd.models.Video;
@@ -112,6 +116,53 @@ public class VideoIOUtil {
 		 * e.printStackTrace(); }
 		 */
 		return finalImg;
+
+	}
+
+	public static BufferedImage mergeImages(Integer[] keyFramesArray, File file) {
+		// Initializing the final image
+		BufferedImage originalFrame = VideoIOUtil.getFrame(file, 0);
+		BufferedImage scaledFrame;
+		int newHeight = 155;
+		int newWidth = 200;
+		BufferedImage tapestry = new BufferedImage(VideoConstant.VIDEO_PLAYER_WIDTH * keyFramesArray.length
+				- keyFramesArray.length * 30 + VideoConstant.VIDEO_PLAYER_WIDTH,
+				originalFrame.getHeight(), originalFrame.getType());
+
+		originalFrame = VideoIOUtil.getFrame(file, keyFramesArray[0]);
+		scaledFrame = VideoIOUtil.getScaledFrame(newWidth, newHeight, originalFrame);
+		tapestry.createGraphics().drawImage(scaledFrame, 0, 0, null);
+
+		for (int j = 0, i = 0, k = 30; j < keyFramesArray.length; j++) {
+			originalFrame = VideoIOUtil.getFrame(file, keyFramesArray[j]);
+			scaledFrame = VideoIOUtil.getScaledFrame(newWidth, newHeight, originalFrame);
+			if (j % 2 == 0) {
+				tapestry.createGraphics().drawImage(scaledFrame, newWidth * j - j * 30, 0, null);
+			} else {
+				tapestry.createGraphics().drawImage(scaledFrame, newWidth * j - j * 30, 50, null);
+			}
+
+		}
+
+		System.out.println("Image concatenated.....");
+
+		try {
+			ImageIO.write(tapestry, "jpeg", new File("finalImg.jpg"));
+		} catch (IOException e) { // TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return tapestry;
+
+	}
+
+	private static BufferedImage getScaledFrame(int newWidth, int newHeight, BufferedImage original) {
+		BufferedImage scaledFrame = new BufferedImage(newWidth, newHeight, original.getType());
+		Graphics2D g = scaledFrame.createGraphics();
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g.drawImage(original, 0, 0, newWidth, newHeight, 0, 0, original.getWidth(), original.getHeight(), null);
+		g.dispose();
+		return scaledFrame;
 
 	}
 

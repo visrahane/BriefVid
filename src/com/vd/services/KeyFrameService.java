@@ -20,13 +20,15 @@ public class KeyFrameService {
 
 	public KeyFrameService(String videoFileName, String audioFileName) {
 		soundService = new SoundService(audioFileName);
+
 	}
 
-	public void processFrames() {
+	public List<Integer> processFrames() {
 		// get key frames from Audio
 		keyFrameExtractor = new HighSoundKeyFrameExtractor(soundService);
 		List<Integer> audioKeyFrames = keyFrameExtractor.getKeyFrames();
 		// get Scenes as key frames
+		return audioKeyFrames;
 
 	}
 
