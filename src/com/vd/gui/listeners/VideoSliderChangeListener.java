@@ -48,7 +48,7 @@ public class VideoSliderChangeListener implements MouseListener {
 		// then multiply it by the progress bar's maximum value.
 		int progressBarVal = (int) Math.round((mouseX / (double) progressBar.getWidth()) * progressBar.getMaximum());
 		int value = (int) (progressBarVal * VideoConstant.VIDEO_FRAME_COUNT / 100);
-		progressBar.setValue(value);
+		progressBar.setValue(progressBarVal);
 		System.out.println("Slider values:" + (progressBarVal * VideoConstant.VIDEO_FRAME_COUNT / 100));
 		gui.pausePlay();
 		gui.getAvPlayer().getVideo().setCurrentFramePtr(value);
