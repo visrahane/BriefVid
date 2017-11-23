@@ -12,11 +12,11 @@ import com.vd.services.SoundService;
  * @author Vis
  *
  */
-public class HighSoundKeyFrameExtractor implements KeyFrameExtractor {
+public class AudioSceneKeyFrameExtractor implements KeyFrameExtractor {
 
 	private SoundService soundService;
 
-	public HighSoundKeyFrameExtractor(SoundService soundService) {
+	public AudioSceneKeyFrameExtractor(SoundService soundService) {
 		this.soundService = soundService;
 	}
 

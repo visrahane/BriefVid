@@ -6,9 +6,9 @@ package com.vd.runnable;
 import java.awt.image.BufferedImage;
 
 import com.vd.constants.VideoConstant;
+import com.vd.key.frames.processing.VideoSceneKeyFrameExtractor;
 import com.vd.player.AVPlayer;
 import com.vd.services.GUI;
-import com.vd.videoprocessing.Histogram;
 
 /**
  * @author Vis

@@ -133,7 +133,7 @@ public class VideoIOUtil {
 		scaledFrame = VideoIOUtil.getScaledFrame(newWidth, newHeight, originalFrame);
 		tapestry.createGraphics().drawImage(scaledFrame, 0, 0, null);
 
-		for (int j = 0, i = 0, k = 30; j < keyFramesArray.length; j++) {
+		for (int j = 0; j < keyFramesArray.length; j++) {
 			originalFrame = VideoIOUtil.getFrame(file, keyFramesArray[j]);
 			scaledFrame = VideoIOUtil.getScaledFrame(newWidth, newHeight, originalFrame);
 			if (j % 2 == 0) {
