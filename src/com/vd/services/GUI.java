@@ -45,6 +45,16 @@ public class GUI {
 
 	private JButton btnPlay;
 
+	private boolean play;
+
+	public boolean isPlay() {
+		return play;
+	}
+
+	public void setPlay(boolean play) {
+		this.play = play;
+	}
+
 	public GUI(String title, String[] args) {
 		frame.setTitle(title);
 		avPlayer = new AVPlayer(args);
@@ -229,6 +239,7 @@ public class GUI {
 
 	private void resetGUI() {
 		progressBar.setValue(0);
+		progressBar.setString(0 + "%");
 		btnPlay.setText(VideoConstant.BUTTON_START_TEXT);
 		lblVideoDisplay.setIcon(null);
 	}
@@ -236,6 +247,10 @@ public class GUI {
 	public void updateSlider(int n) {
 		progressBar.setValue(n);
 		progressBar.setString(n + "%");
+	}
+
+	public void togglePlay() {
+		play = !play;
 	}
 
 }

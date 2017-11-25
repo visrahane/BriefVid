@@ -30,6 +30,7 @@ public class ButtonStopActionListener implements ActionListener {
 		// disable playBtn,enable pauseBn and start playing
 		JButton btn = (JButton) e.getSource();
 		// TODO Auto-generated method stub
+		gui.setPlay(false);
 		gui.stopPlay();
 
 	}
