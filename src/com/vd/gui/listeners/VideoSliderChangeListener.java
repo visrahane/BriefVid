@@ -10,6 +10,7 @@ import javax.swing.JProgressBar;
 
 import com.vd.constants.VideoConstant;
 import com.vd.services.GUI;
+import com.vd.util.VideoIOUtil;
 
 /**
  * @author Vis
@@ -52,8 +53,11 @@ public class VideoSliderChangeListener implements MouseListener {
 		System.out.println("Slider values:" + (progressBarVal * VideoConstant.VIDEO_FRAME_COUNT / 100));
 		gui.pausePlay();
 		gui.getAvPlayer().getVideo().setCurrentFramePtr(value);
-		gui.startPlay();
-
+		if (gui.isPlay()) {
+			gui.startPlay();
+		} else {
+			gui.displayImage(VideoIOUtil.getFrame(gui.getAvPlayer().getVideo().getFile(), value));
+		}
 	}
 
 	@Override
