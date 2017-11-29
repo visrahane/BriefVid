@@ -3,6 +3,7 @@
  */
 package com.vd.util;
 
+import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
@@ -10,11 +11,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.imageio.ImageIO;
 
 import com.vd.constants.VideoConstant;
+import com.vd.models.PythonParams;
 import com.vd.models.Video;
 
 /**
@@ -23,6 +26,7 @@ import com.vd.models.Video;
  */
 public class VideoIOUtil {
 
+	private static final File CURRENT_DIRECTORY = new File(".");;
 	private static final List<Long> frameBufferPointers;
 
 	static {
@@ -123,37 +127,96 @@ public class VideoIOUtil {
 		// Initializing the final image
 		BufferedImage originalFrame = VideoIOUtil.getFrame(file, 0);
 		BufferedImage scaledFrame;
-		int newHeight = 155;
-		int newWidth = 200;
+		int newHeight = VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT;
+		int newWidth = VideoConstant.VIDEO_PLAYER_SCALED_WIDTH;
 		BufferedImage tapestry = new BufferedImage(VideoConstant.VIDEO_PLAYER_WIDTH * keyFramesArray.length
 				- keyFramesArray.length * 30 + VideoConstant.VIDEO_PLAYER_WIDTH,
 				originalFrame.getHeight(), originalFrame.getType());
+		try {
+			for (int j = 0; j < keyFramesArray.length; j++) {
+				originalFrame = VideoIOUtil.getFrame(file, keyFramesArray[j]);
+				scaledFrame = VideoIOUtil.getScaledFrame(newWidth, newHeight, originalFrame);
+				ImageIO.write(scaledFrame, "jpeg", new File("intermediate.jpg"));
+				FaceDetectorUtil.detectFaces("intermediate.jpg");
+				scaledFrame = ImageIO.read(new File("intermediate.jpg"));
+				if (j % 2 == 0) {
+					tapestry.createGraphics().drawImage((scaledFrame), newWidth * j - j * 30, 0, null);
+				} else {
+					tapestry.createGraphics().drawImage(scaledFrame, newWidth * j - j * 30, 50, null);
+				}
 
-		originalFrame = VideoIOUtil.getFrame(file, keyFramesArray[0]);
-		scaledFrame = VideoIOUtil.getScaledFrame(newWidth, newHeight, originalFrame);
-		tapestry.createGraphics().drawImage(scaledFrame, 0, 0, null);
-
-		for (int j = 0; j < keyFramesArray.length; j++) {
-			originalFrame = VideoIOUtil.getFrame(file, keyFramesArray[j]);
-			scaledFrame = VideoIOUtil.getScaledFrame(newWidth, newHeight, originalFrame);
-			if (j % 2 == 0) {
-				tapestry.createGraphics().drawImage(scaledFrame, newWidth * j - j * 30, 0, null);
-			} else {
-				tapestry.createGraphics().drawImage(scaledFrame, newWidth * j - j * 30, 50, null);
 			}
-
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
 		System.out.println("Image concatenated.....");
 
 		try {
 			ImageIO.write(tapestry, "jpeg", new File("finalImg.jpg"));
+			ImageIO.write(VideoIOUtil.blend(VideoIOUtil.getFrame(file, keyFramesArray[3]),
+					VideoIOUtil.getFrame(file, keyFramesArray[4]), 0.5), "jpeg", new File("blend.jpg"));
 		} catch (IOException e) { // TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		return tapestry;
 
+
+		/*BufferedImage originalFrame = VideoIOUtil.getFrame(file, keyFramesArray[37]);
+		int newHeight = 155;
+		int newWidth = 200;
+		try {
+			ImageIO.write(VideoIOUtil.getScaledFrame(newWidth, newHeight, originalFrame), "jpeg",
+					new File("35.jpg"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		BufferedImage tapestry = new BufferedImage(
+				newWidth * keyFramesArray.length - keyFramesArray.length * 30 + VideoConstant.VIDEO_PLAYER_WIDTH,
+				newHeight, originalFrame.getType());
+
+		for (int j = 1; j < keyFramesArray.length / 10; j++) {
+			prepareTapestryImage(keyFramesArray, file, newHeight, newWidth, j);
+		}
+		//
+		try {
+			tapestry = ImageIO.read(new File("finalTapestry.jpg"));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		// tapestry.createGraphics().drawImage(scaledFrame, 0, 0, null);
+
+		System.out.println("Image concatenated.....");
+
+
+		 * try { ImageIO.write(tapestry, "jpeg", new File("finalTapestry.jpg"));
+		 * } catch (IOException e) { // TODO Auto-generated catch block
+		 * e.printStackTrace(); }
+
+
+		return tapestry;
+		 */
+	}
+
+	private static void prepareTapestryImage(Integer[] keyFramesArray, File file, int newHeight, int newWidth, int j) {
+		BufferedImage originalFrame;
+		BufferedImage scaledFrame;
+		originalFrame = VideoIOUtil.getFrame(file, keyFramesArray[j]);
+		scaledFrame = VideoIOUtil.getScaledFrame(newWidth, newHeight, originalFrame);
+		// get combined img from python
+		try {
+			ImageIO.write(scaledFrame, "jpeg", new File(j + ".jpg"));
+			PythonExecutor.executePython(
+					new PythonParams("C:/Users/visha/PycharmProjects/PyramidBlending/pyramidBlend.py",
+							new ArrayList<>(
+									Arrays.asList(CURRENT_DIRECTORY.getCanonicalFile() + "/" + "finalTapestry.jpg",
+											CURRENT_DIRECTORY.getCanonicalFile() + "/" + j + ".jpg"))));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private static BufferedImage getScaledFrame(int newWidth, int newHeight, BufferedImage original) {
@@ -166,8 +229,41 @@ public class VideoIOUtil {
 
 	}
 
-	public static void main(String args[]) {
+	public static void main(String args[]) throws IOException {
 		System.out.println(frameBufferPointers.get(5999));
+		File currentDirectory = new File(new File(".").getAbsolutePath());
+		System.out.println(currentDirectory.getCanonicalPath());
+		System.out.println(currentDirectory.getAbsolutePath());
+		System.out.println(CURRENT_DIRECTORY);
+	}
+
+	public static BufferedImage blend(BufferedImage bi1, BufferedImage bi2, double weight) {
+		if (bi1 == null) {
+			throw new NullPointerException("bi1 is null");
+		}
+
+		if (bi2 == null) {
+			throw new NullPointerException("bi2 is null");
+		}
+
+		int width = bi1.getWidth();
+		if (width != bi2.getWidth()) {
+			throw new IllegalArgumentException("widths not equal");
+		}
+
+		int height = bi1.getHeight();
+		if (height != bi2.getHeight()) {
+			throw new IllegalArgumentException("heights not equal");
+		}
+
+		BufferedImage bi3 = new BufferedImage(width * 2 - 30, height, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g2d = bi3.createGraphics();
+		g2d.drawImage(bi1, null, 0, 0);
+		g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) (1.0 - weight)));
+		g2d.drawImage(bi2, null, 330, 0);
+		g2d.dispose();
+
+		return bi3;
 	}
 
 }
