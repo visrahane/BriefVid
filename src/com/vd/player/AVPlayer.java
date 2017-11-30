@@ -25,7 +25,7 @@ public class AVPlayer {
 	JLabel lbIm1;
 	JLabel lbIm2;
 	private SoundService soundService;
-	private Video video;
+	public static Video video;
 	private VideoFrameBufferRunnable videoFrameBufferRunnable;
 
 	private ArrayBlockingQueue<BufferedImage> bufferQ = new ArrayBlockingQueue<>(
@@ -258,6 +258,10 @@ public class AVPlayer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public Video getCurrentlyPlayingVideo() {
+		return this.video;
 	}
 
 }

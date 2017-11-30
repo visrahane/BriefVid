@@ -2,14 +2,25 @@ package com.vd.key.frames.processing;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.vd.constants.VideoConstant;
+import com.vd.models.Video;
+import com.vd.player.AVPlayer;
+import com.vd.util.VideoIOUtil;
 
 
 // need to decide if to operate on byte array or buffered image
 public class VideoSceneKeyFrameExtractor implements KeyFrameExtractor {
 
+	private Video video;
+	
+	public VideoSceneKeyFrameExtractor(Video video) {
+		this.video = video;
+	}
+	
 	public static int[][][] getFrameColorHistogram(byte[] frame) {
 		// 4 bins of 64 length for r,g,b
 		int [][][] colorHist = new int[4][4][4];
@@ -81,7 +92,22 @@ public class VideoSceneKeyFrameExtractor implements KeyFrameExtractor {
 
 	@Override
 	public List<Integer> getKeyFrames() {
-		// TODO Auto-generated method stub
-		return null;
+		//Video video = AVPlayer.video;
+		List<Integer> keyFrames = new ArrayList<>();
+		File file = video.getFile();
+		BufferedImage prev, next;
+		int diff = 0;
+		
+		for(int i=0; i<VideoConstant.VIDEO_FRAME_COUNT-1; i++) {
+			prev = VideoIOUtil.getFrame(file, i);
+			next = VideoIOUtil.getFrame(file, i+1);
+			
+			diff = getColorHistogramSAD(prev, next);
+			if(diff > 20000) {
+				System.out.println("above diff : " + i);
+				keyFrames.add(i);
+			}
+		}
+		return keyFrames;
 	}
 }

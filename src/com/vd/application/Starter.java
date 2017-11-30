@@ -25,7 +25,7 @@ public class Starter {
 			return;
 		}
 		KeyFrameService keyFrameService = new KeyFrameService(args[0], args[1]);
-		List<Integer> keyFrames =keyFrameService.processFrames();
+		List<Integer> keyFrames = keyFrameService.processFrames();
 		GUI gui = new GUI("CSCI-576", args);
 		TapestryService tapestryService = new TapestryService(gui);
 		BufferedImage tapestryImage = tapestryService.prepareTapestry(keyFrames);
