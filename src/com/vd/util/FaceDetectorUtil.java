@@ -86,11 +86,14 @@ public class FaceDetectorUtil {
 			rectCrop = new Rect(maxMinCoords.minX, maxMinCoords.minY, maxMinCoords.maxX - maxMinCoords.minX,
 					maxMinCoords.maxY - maxMinCoords.minY);
 			image_roi = new Mat(image, rectCrop);
+			Imgcodecs.imwrite("intermediate.jpg", image_roi);
 		} else {
 			image_roi = image;
+			// Picture pic = SeamCarver2.carveSeam(imageFileName);
+			// pic.save("intermediate.jpg");
 		}
 
-		Imgcodecs.imwrite("intermediate.jpg", image_roi);
+
 	}
 
 	private static void expandCoords(MaxMinCoords maxMinCoords, Mat image) {

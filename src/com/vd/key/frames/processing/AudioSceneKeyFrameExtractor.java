@@ -72,4 +72,10 @@ public class AudioSceneKeyFrameExtractor implements KeyFrameExtractor {
 		return (float) Math.sqrt(rms / audioFrame.length);
 	}
 
+	@Override
+	public List<Integer> getKeyFrames(List<Integer> audioKeyFrames) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

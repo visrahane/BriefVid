@@ -129,9 +129,11 @@ public class VideoIOUtil {
 		BufferedImage scaledFrame;
 		int newHeight = VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT;
 		int newWidth = VideoConstant.VIDEO_PLAYER_SCALED_WIDTH;
-		BufferedImage tapestry = new BufferedImage(VideoConstant.VIDEO_PLAYER_WIDTH * keyFramesArray.length
-				- keyFramesArray.length * 30 + VideoConstant.VIDEO_PLAYER_WIDTH,
-				originalFrame.getHeight(), originalFrame.getType());
+		BufferedImage tapestry = new BufferedImage(VideoConstant.VIDEO_PLAYER_SCALED_WIDTH * keyFramesArray.length / 2,
+				VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT * 2, originalFrame.getType());
+
+		int widthPointLocation = 0;
+		int prevLocation = 0, prevHeight = 0;
 		try {
 			for (int j = 0; j < keyFramesArray.length; j++) {
 				originalFrame = VideoIOUtil.getFrame(file, keyFramesArray[j]);
@@ -139,11 +141,17 @@ public class VideoIOUtil {
 				ImageIO.write(scaledFrame, "jpeg", new File("intermediate.jpg"));
 				FaceDetectorUtil.detectFaces("intermediate.jpg");
 				scaledFrame = ImageIO.read(new File("intermediate.jpg"));
+				// scaledFrame = VideoIOUtil.getScaledFrame(newWidth, newHeight
+				// - 50, scaledFrame);
+
 				if (j % 2 == 0) {
-					tapestry.createGraphics().drawImage((scaledFrame), newWidth * j - j * 30, 0, null);
+					tapestry.createGraphics().drawImage((scaledFrame), widthPointLocation, 0, null);
+					prevLocation = widthPointLocation;
+					widthPointLocation += scaledFrame.getWidth();
 				} else {
-					tapestry.createGraphics().drawImage(scaledFrame, newWidth * j - j * 30, 50, null);
+					tapestry.createGraphics().drawImage(scaledFrame, prevLocation, prevHeight, null);
 				}
+				prevHeight = scaledFrame.getHeight();
 
 			}
 		} catch (IOException e) {
@@ -154,13 +162,52 @@ public class VideoIOUtil {
 
 		try {
 			ImageIO.write(tapestry, "jpeg", new File("finalImg.jpg"));
-			ImageIO.write(VideoIOUtil.blend(VideoIOUtil.getFrame(file, keyFramesArray[3]),
-					VideoIOUtil.getFrame(file, keyFramesArray[4]), 0.5), "jpeg", new File("blend.jpg"));
 		} catch (IOException e) { // TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		return tapestry;
+
+		/*		BufferedImage originalFrame = VideoIOUtil.getFrame(file, 0);
+		BufferedImage scaledFrame;
+		int newHeight = VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT;
+		int newWidth = VideoConstant.VIDEO_PLAYER_SCALED_WIDTH;
+		BufferedImage tapestry = new BufferedImage(VideoConstant.VIDEO_PLAYER_SCALED_WIDTH * keyFramesArray.length
+				- keyFramesArray.length * 30 + VideoConstant.VIDEO_PLAYER_SCALED_WIDTH,
+				originalFrame.getHeight(), originalFrame.getType());
+
+		int widthPointLocation = 0;
+		try {
+			for (int j = 0; j < keyFramesArray.length; j++) {
+				originalFrame = VideoIOUtil.getFrame(file, keyFramesArray[j]);
+				scaledFrame = VideoIOUtil.getScaledFrame(newWidth, newHeight, originalFrame);
+				ImageIO.write(scaledFrame, "jpeg", new File("intermediate.jpg"));
+				FaceDetectorUtil.detectFaces("intermediate.jpg");
+				scaledFrame = ImageIO.read(new File("intermediate.jpg"));
+				// scaledFrame = VideoIOUtil.getScaledFrame(newWidth, newHeight
+				// - 50, scaledFrame);
+
+				if (j % 2 == 0) {
+					tapestry.createGraphics().drawImage((scaledFrame), widthPointLocation, 0, null);
+				} else {
+					tapestry.createGraphics().drawImage(scaledFrame, widthPointLocation, 50, null);
+				}
+				widthPointLocation += scaledFrame.getWidth() - 30;
+
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("Image concatenated.....");
+
+		try {
+			ImageIO.write(tapestry, "jpeg", new File("finalImg.jpg"));
+		} catch (IOException e) { // TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return tapestry;*/
 
 
 		/*BufferedImage originalFrame = VideoIOUtil.getFrame(file, keyFramesArray[37]);
@@ -230,11 +277,7 @@ public class VideoIOUtil {
 	}
 
 	public static void main(String args[]) throws IOException {
-		System.out.println(frameBufferPointers.get(5999));
-		File currentDirectory = new File(new File(".").getAbsolutePath());
-		System.out.println(currentDirectory.getCanonicalPath());
-		System.out.println(currentDirectory.getAbsolutePath());
-		System.out.println(CURRENT_DIRECTORY);
+
 	}
 
 	public static BufferedImage blend(BufferedImage bi1, BufferedImage bi2, double weight) {

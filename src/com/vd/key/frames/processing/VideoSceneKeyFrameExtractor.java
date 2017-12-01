@@ -8,7 +8,6 @@ import java.util.List;
 
 import com.vd.constants.VideoConstant;
 import com.vd.models.Video;
-import com.vd.player.AVPlayer;
 import com.vd.util.VideoIOUtil;
 
 
@@ -16,11 +15,11 @@ import com.vd.util.VideoIOUtil;
 public class VideoSceneKeyFrameExtractor implements KeyFrameExtractor {
 
 	private Video video;
-	
+
 	public VideoSceneKeyFrameExtractor(Video video) {
 		this.video = video;
 	}
-	
+
 	public static int[][][] getFrameColorHistogram(byte[] frame) {
 		// 4 bins of 64 length for r,g,b
 		int [][][] colorHist = new int[4][4][4];
@@ -92,22 +91,85 @@ public class VideoSceneKeyFrameExtractor implements KeyFrameExtractor {
 
 	@Override
 	public List<Integer> getKeyFrames() {
-		//Video video = AVPlayer.video;
-		List<Integer> keyFrames = new ArrayList<>();
+		// List<Integer> keyFrames = new ArrayList<>();
 		File file = video.getFile();
 		BufferedImage prev, next;
-		int diff = 0;
-		
+		int diffValues[] = new int[VideoConstant.VIDEO_FRAME_COUNT - 1];
+		int sum = 0;
 		for(int i=0; i<VideoConstant.VIDEO_FRAME_COUNT-1; i++) {
 			prev = VideoIOUtil.getFrame(file, i);
 			next = VideoIOUtil.getFrame(file, i+1);
-			
-			diff = getColorHistogramSAD(prev, next);
-			if(diff > 20000) {
-				System.out.println("above diff : " + i);
+
+			diffValues[i] = getColorHistogramSAD(prev, next);
+			sum += diffValues[i];
+			// System.out.println("above diff : " + diffValues[i]);
+			/*if (diffValues[i] > 20000) {
+				// System.out.println("above diff : " + i);
 				keyFrames.add(i);
+			}*/
+		}
+		int avg = sum / (VideoConstant.VIDEO_FRAME_COUNT - 1);
+		System.out.println("average:" + avg);
+		float variance = getVariance(diffValues, avg);
+		float deviation=(float) Math.sqrt(variance);
+		return getKeyFramesFromDeviation(diffValues, deviation);
+	}
+
+	@Override
+	public List<Integer> getKeyFrames(List<Integer> framesList) {
+		int size = framesList.size();
+		BufferedImage prev, next;
+		File file = video.getFile();
+		int diffValues[] = new int[size];
+		int sum = 0;
+
+		for (int i = 0; i < size - 1; i++) {
+			prev = VideoIOUtil.getFrame(file, i);
+			next = VideoIOUtil.getFrame(file, i + 1);
+
+			diffValues[i] = getColorHistogramSAD(prev, next);
+			System.out.println(diffValues[i]);
+			sum += diffValues[i];
+		}
+
+		int avg = sum / (size - 1);
+
+		float variance = getVariance(diffValues, avg);
+		float deviation = (float) Math.sqrt(variance);
+		return getKeyFramesFromDeviation(diffValues, deviation, framesList);
+	}
+
+	private List<Integer> getKeyFramesFromDeviation(int[] diffValues, float deviation, List<Integer> framesList) {
+		List<Integer> keyFrames = new ArrayList<>();
+		deviation *= 2;
+		System.out.println(deviation);
+
+		for (int i = 0; i < diffValues.length; i++) {
+			if (diffValues[i] > deviation) {
+				keyFrames.add(framesList.get(i));
+				System.out.println("i frame selected-" + i);
 			}
 		}
 		return keyFrames;
+	}
+
+	private List<Integer> getKeyFramesFromDeviation(int[] diffValues, float deviation) {
+		List<Integer> keyFrames = new ArrayList<>();
+		System.out.println(deviation);
+		for(int i=0;i<diffValues.length;i++){
+			if(diffValues[i]>deviation){
+				keyFrames.add(i);
+				System.out.println("i frame selected-" + i);
+			}
+		}
+		return keyFrames;
+	}
+
+	private float getVariance(int[] values, int avg) {
+		float var = 0;
+		for (int i = 0; i < values.length - 1; i++) {
+			var += Math.pow((avg - values[i]), 2);
+		}
+		return var / (values.length - 1);
 	}
 }

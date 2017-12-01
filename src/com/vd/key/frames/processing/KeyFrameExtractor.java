@@ -13,4 +13,6 @@ public interface KeyFrameExtractor {
 
 	List<Integer> getKeyFrames();
 
+	List<Integer> getKeyFrames(List<Integer> audioKeyFrames);
+
 }
