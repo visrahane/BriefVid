@@ -10,10 +10,15 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
 import com.vd.constants.VideoConstant;
+
+import seam.Picture;
+import seam.SeamCarver2;
 
 public class FaceDetectorUtil {
 
@@ -86,11 +91,26 @@ public class FaceDetectorUtil {
 			rectCrop = new Rect(maxMinCoords.minX, maxMinCoords.minY, maxMinCoords.maxX - maxMinCoords.minX,
 					maxMinCoords.maxY - maxMinCoords.minY);
 			image_roi = new Mat(image, rectCrop);
-			Imgcodecs.imwrite("intermediate.jpg", image_roi);
+
+			int dimenMult = VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT/image_roi.height();
+			//			BufferedImage buf = getBufferedImage(image_roi);
+
+			// Creating an empty matrix to store the result
+			Mat dst = new Mat();
+
+			// Creating the Size object
+			Size size = new Size(VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT, image_roi.cols() * dimenMult);
+
+			// Scaling the Image
+			Imgproc.resize(image_roi, dst, size, 0, 0, Imgproc.INTER_AREA);
+
+			Imgcodecs.imwrite("intermediate.jpg", dst);
 		} else {
-			image_roi = image;
-			// Picture pic = SeamCarver2.carveSeam(imageFileName);
-			// pic.save("intermediate.jpg");
+			//			image_roi = image;
+			Picture pic = SeamCarver2.carveSeam(imageFileName);
+
+			//			 pic.setImage(VideoIOUtil.getScaledFrame(pic.width() * dimenMult, VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT, pic.getImage()));
+			pic.save("intermediate.jpg");
 		}
 
 

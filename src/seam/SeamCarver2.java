@@ -298,12 +298,12 @@ public class SeamCarver2 {
 	public static Picture carveSeam(String fileName) {
 		Picture pic = new Picture(fileName);
 		SeamCarver2 sc = new SeamCarver2(pic);
-
-		for (int i = 0; i < 50; i++) {
+		
+		for (int i = 0; i < 0; i++) {
 			int[] horSeam = sc.findHorizontalSeam();
 			sc.removeHorizontalSeam(horSeam);
 		}
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 45; i++) {
 			int[] verSeam = sc.findVerticalSeam();
 			sc.removeVerticalSeam(verSeam);
 		}

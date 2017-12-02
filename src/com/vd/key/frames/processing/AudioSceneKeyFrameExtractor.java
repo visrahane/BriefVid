@@ -25,7 +25,7 @@ public class AudioSceneKeyFrameExtractor implements KeyFrameExtractor {
 		float[] rms = getRMSValues();
 		float variance = getVariance(rms);
 		float deviation = (float) Math.sqrt(variance);
-		System.out.println("Deviation" + Math.sqrt(variance));
+		System.out.println("Audio Deviation " + Math.sqrt(variance));
 		return getKeyFrames(deviation, rms);
 	}
 

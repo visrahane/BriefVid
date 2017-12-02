@@ -114,13 +114,7 @@ public class VideoIOUtil {
 			}
 		}
 		System.out.println("Image concatenated.....");
-		/*
-		 * try { ImageIO.write(finalImg, "jpeg", new File("finalImg.jpg")); }
-		 * catch (IOException e) { // TODO Auto-generated catch block
-		 * e.printStackTrace(); }
-		 */
 		return finalImg;
-
 	}
 
 	public static BufferedImage mergeImages(Integer[] keyFramesArray, File file) {
@@ -141,8 +135,7 @@ public class VideoIOUtil {
 				ImageIO.write(scaledFrame, "jpeg", new File("intermediate.jpg"));
 				FaceDetectorUtil.detectFaces("intermediate.jpg");
 				scaledFrame = ImageIO.read(new File("intermediate.jpg"));
-				// scaledFrame = VideoIOUtil.getScaledFrame(newWidth, newHeight
-				// - 50, scaledFrame);
+				//scaledFrame = VideoIOUtil.getScaledFrame(newWidth, newHeight-50, scaledFrame);
 
 				if (j % 2 == 0) {
 					tapestry.createGraphics().drawImage((scaledFrame), widthPointLocation, 0, null);
@@ -266,7 +259,7 @@ public class VideoIOUtil {
 		}
 	}
 
-	private static BufferedImage getScaledFrame(int newWidth, int newHeight, BufferedImage original) {
+	public static BufferedImage getScaledFrame(int newWidth, int newHeight, BufferedImage original) {
 		BufferedImage scaledFrame = new BufferedImage(newWidth, newHeight, original.getType());
 		Graphics2D g = scaledFrame.createGraphics();
 		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
