@@ -1,5 +1,6 @@
 package com.vd.util;
 
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.nio.ByteBuffer;
@@ -93,27 +94,29 @@ public class FaceDetectorUtil {
 			image_roi = new Mat(image, rectCrop);
 
 			int dimenMult = VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT/image_roi.height();
-			//			BufferedImage buf = getBufferedImage(image_roi);
 
-			// Creating an empty matrix to store the result
+			// scaling detected face to the same height as the keyframe
 			Mat dst = new Mat();
 
-			// Creating the Size object
 			Size size = new Size(VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT, image_roi.cols() * dimenMult);
 
-			// Scaling the Image
 			Imgproc.resize(image_roi, dst, size, 0, 0, Imgproc.INTER_AREA);
-
 			Imgcodecs.imwrite("intermediate.jpg", dst);
 		} else {
-			//			image_roi = image;
 			Picture pic = SeamCarver2.carveSeam(imageFileName);
+			BufferedImage buff = pic.getImage();
 
-			//			 pic.setImage(VideoIOUtil.getScaledFrame(pic.width() * dimenMult, VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT, pic.getImage()));
+			// crop from above = 50 crop from below = 50
+			BufferedImage newBuff = buff.getSubimage(0, 50, buff.getWidth(), buff.getHeight() - 50);
+
+			BufferedImage copyOfImage = new BufferedImage(newBuff.getWidth(), newBuff.getHeight(),
+					BufferedImage.TYPE_INT_RGB);
+			Graphics g = copyOfImage.createGraphics();
+			g.drawImage(buff, 0, 0, null);
+
+			pic.setImage(copyOfImage);
 			pic.save("intermediate.jpg");
 		}
-
-
 	}
 
 	private static void expandCoords(MaxMinCoords maxMinCoords, Mat image) {
@@ -129,7 +132,6 @@ public class FaceDetectorUtil {
 		if (maxMinCoords.maxY + 20 <= image.height()) {
 			maxMinCoords.maxY += 20;
 		}
-
 	}
 
 	public static void main(String[] args) {
