@@ -100,6 +100,35 @@ public class VideoSceneKeyFrameExtractor implements KeyFrameExtractor {
 		return absDiff;
 	}
 
+	public static int getColorHistogramChiSquareTest(BufferedImage frame1, BufferedImage frame2) {
+		int[][][] colorHist1 = getFrameColorHistogram(frame1);
+		int[][][] colorHist2 = getFrameColorHistogram(frame2);
+
+		double value = 0;
+		int max = 0;
+
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				for (int k = 0; k < 4; k++) {
+					int histValue1 = colorHist1[i][j][k];
+					int histValue2 = colorHist2[i][j][k];
+
+					if (histValue1 != 0 && histValue2 != 0) {
+						if (histValue1 > histValue2) {
+							max = histValue1;
+						} else {
+							max = histValue2;
+						}
+
+						value += Math.pow(histValue1 - histValue2, 2) / max;
+					}
+				}
+			}
+		}
+
+		return (int) value;
+	}
+
 	@Override
 	public List<Integer> getKeyFrames(int multiplier) {
 		// temporary assignment
@@ -115,6 +144,7 @@ public class VideoSceneKeyFrameExtractor implements KeyFrameExtractor {
 			next = VideoIOUtil.getFrame(file, i+1);
 
 			diffValues[i] = getColorHistogramSAD(prev, next);
+			// diffValues[i] = getColorHistogramChiSquareTest(prev, next);
 			sum += diffValues[i];
 
 			// diff logging
@@ -126,6 +156,7 @@ public class VideoSceneKeyFrameExtractor implements KeyFrameExtractor {
 				System.out.println("Frame " + i + " - Frame " + (i+1) + " = " + diffValues[i]);
 			}
 			 */
+
 		}
 		int avg = sum / (VideoConstant.VIDEO_FRAME_COUNT - 1);
 		System.out.println("average:" + avg);
