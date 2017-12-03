@@ -21,7 +21,7 @@ public class AudioSceneKeyFrameExtractor implements KeyFrameExtractor {
 	}
 
 	@Override
-	public List<Integer> getKeyFrames() {
+	public List<Integer> getKeyFrames(int multiplier) {
 		float[] rms = getRMSValues();
 		float variance = getVariance(rms);
 		float deviation = (float) Math.sqrt(variance);
@@ -73,7 +73,7 @@ public class AudioSceneKeyFrameExtractor implements KeyFrameExtractor {
 	}
 
 	@Override
-	public List<Integer> getKeyFrames(List<Integer> audioKeyFrames) {
+	public List<Integer> getKeyFrames(List<Integer> level3, int multiplier) {
 		// TODO Auto-generated method stub
 		return null;
 	}

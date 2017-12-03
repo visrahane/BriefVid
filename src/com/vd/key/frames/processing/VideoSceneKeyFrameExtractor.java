@@ -4,7 +4,10 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.vd.constants.VideoConstant;
 import com.vd.models.Video;
@@ -14,11 +17,16 @@ import com.vd.util.VideoIOUtil;
 // need to decide if to operate on byte array or buffered image
 public class VideoSceneKeyFrameExtractor implements KeyFrameExtractor {
 
-	public static final double DEVIATION_MULTIPLIER = 4.0;
+	public static double DEVIATION_MULTIPLIER = 4.0;
 	private Video video;
 
 	public VideoSceneKeyFrameExtractor(Video video) {
 		this.video = video;
+	}
+
+	public VideoSceneKeyFrameExtractor(Video video, int multiplier) {
+		this.video = video;
+		DEVIATION_MULTIPLIER = multiplier;
 	}
 
 	public static int[][][] getFrameColorHistogram(byte[] frame) {
@@ -93,8 +101,9 @@ public class VideoSceneKeyFrameExtractor implements KeyFrameExtractor {
 	}
 
 	@Override
-	public List<Integer> getKeyFrames() {
-
+	public List<Integer> getKeyFrames(int multiplier) {
+		// temporary assignment
+		DEVIATION_MULTIPLIER = multiplier;
 		System.out.println("----Diff values of all frames in the video----");
 		File file = video.getFile();
 		BufferedImage prev, next;
@@ -166,7 +175,8 @@ public class VideoSceneKeyFrameExtractor implements KeyFrameExtractor {
 	}
 
 	@Override
-	public List<Integer> getKeyFrames(List<Integer> framesList) {
+	public List<Integer> getKeyFrames(List<Integer> framesList, int multiplier) {
+		DEVIATION_MULTIPLIER = multiplier;
 		int size = framesList.size();
 		BufferedImage prev, next;
 		File file = video.getFile();
@@ -181,12 +191,13 @@ public class VideoSceneKeyFrameExtractor implements KeyFrameExtractor {
 			//			next = VideoIOUtil.getFrame(file, 358);
 
 			diffValues[i] = getColorHistogramSAD(prev, next);
-			//			System.out.println("ans : " + diffValues[i]);
-			System.out.println("Frame " + i + " - Frame " + (i+1) + " = " + diffValues[i]);
+			//	System.out.println("ans : " + diffValues[i]);
+			//	System.out.println("Frame " + i + " - Frame " + (i+1) + " = " + diffValues[i]);
 			sum += diffValues[i];
 		}
 
 		int avg = sum / (size - 1);
+		System.out.println("DiffList:" + Arrays.toString(diffValues));
 		System.out.println("Frames list average : " + avg);
 		float variance = getVariance(diffValues, avg);
 		float deviation = (float) Math.sqrt(variance);
@@ -214,9 +225,9 @@ public class VideoSceneKeyFrameExtractor implements KeyFrameExtractor {
 	}
 
 	private List<Integer> getKeyFramesFromDeviation(int[] diffValues, float deviation, List<Integer> framesList) {
-		List<Integer> keyFrames = new ArrayList<>();
-		deviation *= DEVIATION_MULTIPLIER;
+		Set<Integer> keyFrames = new LinkedHashSet<>();
 		System.out.println("Frames list Deviation : " + deviation);
+		deviation *= DEVIATION_MULTIPLIER;
 		System.out.println("Using deviation multiplier: " + DEVIATION_MULTIPLIER);
 
 		for (int i = 0; i < diffValues.length; i++) {
@@ -225,7 +236,7 @@ public class VideoSceneKeyFrameExtractor implements KeyFrameExtractor {
 				keyFrames.add(framesList.get(i+1));
 			}
 		}
-		return keyFrames;
+		return new ArrayList<>(keyFrames);
 	}
 
 	private List<Integer> getKeyFramesFromDeviation(int[] diffValues, float deviation) {
@@ -250,4 +261,5 @@ public class VideoSceneKeyFrameExtractor implements KeyFrameExtractor {
 		}
 		return var / (values.length - 1);
 	}
+
 }
