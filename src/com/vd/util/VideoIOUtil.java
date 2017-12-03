@@ -266,7 +266,6 @@ public class VideoIOUtil {
 		g.drawImage(original, 0, 0, newWidth, newHeight, 0, 0, original.getWidth(), original.getHeight(), null);
 		g.dispose();
 		return scaledFrame;
-
 	}
 
 	public static void main(String args[]) throws IOException {

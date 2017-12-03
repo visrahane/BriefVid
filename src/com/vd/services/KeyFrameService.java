@@ -34,17 +34,22 @@ public class KeyFrameService {
 		// get Scenes as key frames
 		Video video = new Video(videoFilePath, VideoConstant.VIDEO_PLAYER_HEIGHT, VideoConstant.VIDEO_PLAYER_WIDTH);
 		keyFrameExtractor = new VideoSceneKeyFrameExtractor(video);
-		
+
 		// getting hist diff keyframes from the audio key frames
-		List<Integer> videoKeyFrames = keyFrameExtractor.getKeyFrames(audioKeyFrames);
-		
+		// List<Integer> videoKeyFrames =
+		// keyFrameExtractor.getKeyFrames(audioKeyFrames);
+
 		// getting hist diff keyframes from the entire video
-//		List<Integer> videoKeyFrames = keyFrameExtractor.getKeyFrames();
-		
+		List<Integer> videoKeyFrames = keyFrameExtractor.getKeyFrames();
+
+		// get keyFrames using locality
+		// VideoSceneKeyFrameExtractor vs = new VideoSceneKeyFrameExtractor(video);
+		// List<Integer> videoKeyFrames = vs.getKeyFramesUsingLocality();
+
 		System.out.println("Video frame count from histogram: " + videoKeyFrames.size());
 		// return mergeKeyFrames(videoKeyFrames, audioKeyFrames);
 		// return audioKeyFrames;
-		
+
 		System.out.println("extracted key frames : " + videoKeyFrames.toString());
 		System.out.println("extracted frames count : " + videoKeyFrames.size());
 		return videoKeyFrames;

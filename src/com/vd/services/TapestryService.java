@@ -32,5 +32,4 @@ public class TapestryService {
 	public void displayTapestry(BufferedImage img) {
 		gui.displayTapestry(img);
 	}
-
 }
