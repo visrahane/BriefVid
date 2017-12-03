@@ -123,26 +123,31 @@ public class VideoIOUtil {
 		BufferedImage scaledFrame;
 		int newHeight = VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT;
 		int newWidth = VideoConstant.VIDEO_PLAYER_SCALED_WIDTH;
-		BufferedImage tapestry = new BufferedImage(VideoConstant.VIDEO_PLAYER_SCALED_WIDTH * keyFramesArray.length / 2,
-				VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT * 2, originalFrame.getType());
+		BufferedImage tapestry = new BufferedImage(
+				(int) ((newWidth - 45) * Math.ceil((float) keyFramesArray.length / 2)),
+				newHeight * 2, originalFrame.getType());
 
 		int widthPointLocation = 0;
 		int prevLocation = 0, prevHeight = 0;
+
 		try {
 			for (int j = 0; j < keyFramesArray.length; j++) {
 				originalFrame = VideoIOUtil.getFrame(file, keyFramesArray[j]);
 				scaledFrame = VideoIOUtil.getScaledFrame(newWidth, newHeight, originalFrame);
+
 				ImageIO.write(scaledFrame, "jpeg", new File("intermediate.jpg"));
 				FaceDetectorUtil.detectFaces("intermediate.jpg");
 				scaledFrame = ImageIO.read(new File("intermediate.jpg"));
-				//scaledFrame = VideoIOUtil.getScaledFrame(newWidth, newHeight-50, scaledFrame);
+				// scaledFrame = VideoIOUtil.getScaledFrame(newWidth-45,
+				// newHeight , scaledFrame);
 
 				if (j % 2 == 0) {
 					tapestry.createGraphics().drawImage((scaledFrame), widthPointLocation, 0, null);
 					prevLocation = widthPointLocation;
 					widthPointLocation += scaledFrame.getWidth();
 				} else {
-					tapestry.createGraphics().drawImage(scaledFrame, prevLocation, prevHeight, null);
+					tapestry.createGraphics().drawImage(scaledFrame, prevLocation,
+							VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT, null);
 				}
 				prevHeight = scaledFrame.getHeight();
 

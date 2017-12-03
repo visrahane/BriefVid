@@ -97,7 +97,7 @@ public class GUI {
 
 		bottomPanel = new JPanel();
 		bottomPanel.setPreferredSize(new Dimension(500, 330));
-		bottomPanel.setBackground(Color.black);
+		bottomPanel.setBackground(Color.white);
 		bottomPanel.setPreferredSize(new Dimension(500, 330));
 		frame.getContentPane().add(bottomPanel);
 

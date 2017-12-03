@@ -298,7 +298,7 @@ public class SeamCarver2 {
 	public static Picture carveSeam(String fileName) {
 		Picture pic = new Picture(fileName);
 		SeamCarver2 sc = new SeamCarver2(pic);
-		
+
 		for (int i = 0; i < 0; i++) {
 			int[] horSeam = sc.findHorizontalSeam();
 			sc.removeHorizontalSeam(horSeam);
@@ -313,12 +313,12 @@ public class SeamCarver2 {
 	}
 
 	public static void main(String[] args) {
-		Picture pic = new Picture("Lenna.bmp");
+		Picture pic = new Picture("original.jpg");
 		SeamCarver2 sc = new SeamCarver2(pic);
 		System.out.println("Picture width = " + sc.width());
 		System.out.println("Picture height = " + sc.height());
 
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 130; i++) {
 			int[] horSeam = sc.findHorizontalSeam();
 			sc.removeHorizontalSeam(horSeam);
 		}
@@ -327,6 +327,7 @@ public class SeamCarver2 {
 			sc.removeVerticalSeam(verSeam);
 		}
 		System.out.println(sc.picture.height());
+		sc.picture.show();
 		sc.picture.save("out.jpg");
 	}
 

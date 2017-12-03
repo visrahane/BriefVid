@@ -1,6 +1,5 @@
 package com.vd.util;
 
-import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.nio.ByteBuffer;
@@ -82,7 +81,8 @@ public class FaceDetectorUtil {
 		Mat image = Imgcodecs.imread(imageFileName);
 		MatOfRect faceDetections = new MatOfRect();
 		faceDetector.detectMultiScale(image, faceDetections);
-		//System.out.println("Detected faces-" + faceDetections.toArray().length);
+		// System.out.println("Detected faces-" +
+		// faceDetections.toArray().length);
 		MaxMinCoords maxMinCoords = getBorderCoords(faceDetections);
 		expandCoords(maxMinCoords, image);
 
@@ -93,49 +93,48 @@ public class FaceDetectorUtil {
 					maxMinCoords.maxY - maxMinCoords.minY);
 			image_roi = new Mat(image, rectCrop);
 
-			int dimenMult = VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT/image_roi.height();
-
 			// scaling detected face to the same height as the keyframe
 			Mat dst = new Mat();
 
-			Size size = new Size(VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT, image_roi.cols() * dimenMult);
+			Size size = new Size(VideoConstant.VIDEO_PLAYER_SCALED_WIDTH - 45,
+					VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT);
 
 			Imgproc.resize(image_roi, dst, size, 0, 0, Imgproc.INTER_AREA);
 			Imgcodecs.imwrite("intermediate.jpg", dst);
+			// Imgcodecs.imwrite("intermediate.jpg", image_roi);
 		} else {
 			Picture pic = SeamCarver2.carveSeam(imageFileName);
-			BufferedImage buff = pic.getImage();
-
-			// crop from above = 50 crop from below = 50
-			BufferedImage newBuff = buff.getSubimage(0, 50, buff.getWidth(), buff.getHeight() - 50);
-
-			BufferedImage copyOfImage = new BufferedImage(newBuff.getWidth(), newBuff.getHeight(),
-					BufferedImage.TYPE_INT_RGB);
-			Graphics g = copyOfImage.createGraphics();
-			g.drawImage(buff, 0, 0, null);
-
-			pic.setImage(copyOfImage);
 			pic.save("intermediate.jpg");
+			// pic.show();
 		}
 	}
 
 	private static void expandCoords(MaxMinCoords maxMinCoords, Mat image) {
+		// 28 black bar
 		if (maxMinCoords.minX - 10 >= 0) {
 			maxMinCoords.minX -= 10;
+		} else {
+			maxMinCoords.minX = 0;
 		}
-		if (maxMinCoords.minY - 10 >= 0) {
+		if (maxMinCoords.minY - 10 >= 28) {
 			maxMinCoords.minY -= 10;
+		} else {
+			maxMinCoords.minY = 28;
 		}
 		if (maxMinCoords.maxX + 20 <= image.width()) {
 			maxMinCoords.maxX += 20;
+		} else {
+			maxMinCoords.maxX = image.width();
 		}
-		if (maxMinCoords.maxY + 20 <= image.height()) {
+		if (maxMinCoords.maxY + 20 <= image.height() - 28) {
 			maxMinCoords.maxY += 20;
+		} else {
+			maxMinCoords.maxY = image.height() - 28;
 		}
 	}
 
 	public static void main(String[] args) {
-		detectFaces("1.jpg");
+		detectFaces("9.jpg");
 
 	}
 
