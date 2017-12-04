@@ -3,6 +3,7 @@
  */
 package com.vd.services;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -95,14 +96,13 @@ public class GUI {
 		sliderPanel.add(progressBar);
 		progressBar.addMouseListener(new VideoSliderChangeListener(this));
 
-		bottomPanel = new JPanel();
-		bottomPanel.setPreferredSize(new Dimension(500, 330));
-		bottomPanel.setBackground(Color.white);
-		bottomPanel.setPreferredSize(new Dimension(500, 330));
+		bottomPanel = new JPanel(new BorderLayout());
+		// bottomPanel.setPreferredSize(new Dimension(500, 330));
+		bottomPanel.setBackground(Color.gray);
 		frame.getContentPane().add(bottomPanel);
 
 		lblTapestryDisplay = new JLabel();
-		bottomPanel.add(lblTapestryDisplay);
+		bottomPanel.add(lblTapestryDisplay, BorderLayout.CENTER);
 
 		frame.pack();
 		frame.setVisible(true);

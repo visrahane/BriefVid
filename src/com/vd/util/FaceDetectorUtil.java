@@ -10,15 +10,10 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
-import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
 import com.vd.constants.VideoConstant;
-
-import seam.Picture;
-import seam.SeamCarver2;
 
 public class FaceDetectorUtil {
 
@@ -94,17 +89,18 @@ public class FaceDetectorUtil {
 			image_roi = new Mat(image, rectCrop);
 
 			// scaling detected face to the same height as the keyframe
-			Mat dst = new Mat();
-
+			/*Mat dst = new Mat();
+			
 			Size size = new Size(VideoConstant.VIDEO_PLAYER_SCALED_WIDTH - 45,
 					VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT);
 
 			Imgproc.resize(image_roi, dst, size, 0, 0, Imgproc.INTER_AREA);
-			Imgcodecs.imwrite("intermediate.jpg", dst);
-			// Imgcodecs.imwrite("intermediate.jpg", image_roi);
+			Imgcodecs.imwrite("intermediate.jpg", dst);*/
+		
+			Imgcodecs.imwrite("intermediate.jpg", image_roi);
 		} else {
-			Picture pic = SeamCarver2.carveSeam(imageFileName);
-			pic.save("intermediate.jpg");
+			//Picture pic = SeamCarver2.carveSeam(imageFileName);
+			//pic.save("intermediate.jpg");
 			// pic.show();
 		}
 	}
@@ -116,10 +112,10 @@ public class FaceDetectorUtil {
 		} else {
 			maxMinCoords.minX = 0;
 		}
-		if (maxMinCoords.minY - 10 >= 28) {
+		if (maxMinCoords.minY - 10 >= 0) {
 			maxMinCoords.minY -= 10;
 		} else {
-			maxMinCoords.minY = 28;
+			maxMinCoords.minY = 0;
 		}
 		if (maxMinCoords.maxX + 20 <= image.width()) {
 			maxMinCoords.maxX += 20;
@@ -129,12 +125,12 @@ public class FaceDetectorUtil {
 		if (maxMinCoords.maxY + 20 <= image.height() - 28) {
 			maxMinCoords.maxY += 20;
 		} else {
-			maxMinCoords.maxY = image.height() - 28;
+			maxMinCoords.maxY = image.height();
 		}
 	}
 
 	public static void main(String[] args) {
-		detectFaces("9.jpg");
+		detectFaces("6-806.jpg");
 
 	}
 

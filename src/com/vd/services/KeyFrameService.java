@@ -31,22 +31,11 @@ public class KeyFrameService {
 		// get key frames from Audio
 		keyFrameExtractor = new AudioSceneKeyFrameExtractor(soundService);
 		List<Integer> audioKeyFrames = keyFrameExtractor.getKeyFrames(2);
-		System.out.println("A:" + audioKeyFrames.size());
-		System.out.println("extracted A key frames : " + audioKeyFrames.toString());
+		System.out.println("Audio KeyFrames Count:" + audioKeyFrames.size());
+		System.out.println("Audio key frames List : " + audioKeyFrames.toString());
 		// get Scenes as key frames
 		Video video = new Video(videoFilePath, VideoConstant.VIDEO_PLAYER_HEIGHT, VideoConstant.VIDEO_PLAYER_WIDTH);
 		keyFrameExtractor = new VideoSceneKeyFrameExtractor(video);
-
-		// getting hist diff keyframes from the audio key frames
-		// List<Integer> videoKeyFrames =
-		// keyFrameExtractor.getKeyFrames(audioKeyFrames);
-
-		// getting hist diff keyframes from the entire video
-		// List<Integer> videoKeyFrames = keyFrameExtractor.getKeyFrames();
-
-		// get keyFrames using locality
-		// VideoSceneKeyFrameExtractor vs = new VideoSceneKeyFrameExtractor(video);
-		// List<Integer> videoKeyFrames = vs.getKeyFramesUsingLocality();
 
 		// getting hist diff keyframes from the entire video
 		List<Integer> videoKeyFrames = keyFrameExtractor.getKeyFrames(4);
@@ -55,15 +44,14 @@ public class KeyFrameService {
 		Set<Integer> totalkeyFrames = new TreeSet<>(videoKeyFrames);
 
 		List<Integer> level3 = new ArrayList<>(totalkeyFrames);
-		List<Integer> level2 = keyFrameExtractor.getKeyFrames(level3, 2);
-		List<Integer> level1 = keyFrameExtractor.getKeyFrames(level2, 3);
-
-		System.out.println("Video frame count from histogram: " + videoKeyFrames.size());
-		// return mergeKeyFrames(videoKeyFrames, audioKeyFrames);
-		// return audioKeyFrames;
-
-		System.out.println("extracted key frames : " + videoKeyFrames.toString());
-		System.out.println("extracted frames count : " + videoKeyFrames.size());
+		System.out.println("Video level3 KeyFrames Count:" + level3.size());
+		System.out.println("Video level3 key frames List : " + level3.toString());
+		List<Integer> level2 = keyFrameExtractor.getKeyFrames(level3, 1);
+		System.out.println("Video level2 KeyFrames Count:" + level2.size());
+		System.out.println("Video level2 key frames List : " + level2.toString());
+		List<Integer> level1 = keyFrameExtractor.getKeyFrames(level2, 2);
+		System.out.println("Video level1 KeyFrames Count:" + level1.size());
+		System.out.println("Video level1 key frames List : " + level1.toString());
 		return level1;
 	}
 

@@ -4,6 +4,7 @@
 package com.vd.util;
 
 import java.awt.AlphaComposite;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
@@ -130,16 +131,26 @@ public class VideoIOUtil {
 		int widthPointLocation = 0;
 		int prevLocation = 0, prevHeight = 0;
 
+		originalFrame = VideoIOUtil.getFrame(file, keyFramesArray[6]);
+		try {
+			ImageIO.write(originalFrame, "jpeg", new File("original.jpg"));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
 		try {
 			for (int j = 0; j < keyFramesArray.length; j++) {
 				originalFrame = VideoIOUtil.getFrame(file, keyFramesArray[j]);
-				scaledFrame = VideoIOUtil.getScaledFrame(newWidth, newHeight, originalFrame);
+
+				BufferedImage croppedImage = getCroppedFrame(originalFrame);
+
+				scaledFrame = VideoIOUtil.getScaledFrame(newWidth, newHeight, croppedImage);
 
 				ImageIO.write(scaledFrame, "jpeg", new File("intermediate.jpg"));
 				FaceDetectorUtil.detectFaces("intermediate.jpg");
 				scaledFrame = ImageIO.read(new File("intermediate.jpg"));
-				// scaledFrame = VideoIOUtil.getScaledFrame(newWidth-45,
-				// newHeight , scaledFrame);
+				scaledFrame = VideoIOUtil.getScaledFrame(newWidth - 45, newHeight, scaledFrame);
 
 				if (j % 2 == 0) {
 					tapestry.createGraphics().drawImage((scaledFrame), widthPointLocation, 0, null);
@@ -246,6 +257,15 @@ public class VideoIOUtil {
 		 */
 	}
 
+	private static BufferedImage getCroppedFrame(BufferedImage originalFrame) {
+		BufferedImage img = originalFrame.getSubimage(0, 45, originalFrame.getWidth(), originalFrame.getHeight() - 90);
+		BufferedImage copyOfImage = new BufferedImage(img.getWidth(), img.getHeight(),
+				BufferedImage.TYPE_INT_RGB);
+		Graphics g = copyOfImage.createGraphics();
+		g.drawImage(img, 0, 0, null);
+		return copyOfImage;
+	}
+
 	private static void prepareTapestryImage(Integer[] keyFramesArray, File file, int newHeight, int newWidth, int j) {
 		BufferedImage originalFrame;
 		BufferedImage scaledFrame;
@@ -274,6 +294,12 @@ public class VideoIOUtil {
 	}
 
 	public static void main(String args[]) throws IOException {
+		BufferedImage scaledFrame = ImageIO.read(new File("original.jpg"));
+		try {
+			ImageIO.write(getCroppedFrame(scaledFrame), "jpeg", new File("withoutBlack.jpg"));
+		} catch (IOException e) { // TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 

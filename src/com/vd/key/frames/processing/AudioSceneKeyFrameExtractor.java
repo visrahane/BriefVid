@@ -60,7 +60,7 @@ public class AudioSceneKeyFrameExtractor implements KeyFrameExtractor {
 			// System.out.println(i + " frame: rms-" + rms[i]);
 		}
 		rms[countOfFrames] = sum / countOfFrames;
-		System.out.println("Avg:" + rms[countOfFrames]);
+		System.out.println("Audio Avg:" + rms[countOfFrames]);
 		return rms;
 	}
 
