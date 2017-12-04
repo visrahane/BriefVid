@@ -11,6 +11,8 @@ import java.util.List;
  */
 public interface KeyFrameExtractor {
 
-	List<Integer> getKeyFrames();
+	List<Integer> getKeyFrames(List<Integer> level3, int multiplier);
+
+	List<Integer> getKeyFrames(int multiplier);
 
 }

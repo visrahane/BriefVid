@@ -12,22 +12,21 @@ import com.vd.services.SoundService;
  * @author Vis
  *
  */
-public class HighSoundKeyFrameExtractor implements KeyFrameExtractor {
+public class AudioSceneKeyFrameExtractor implements KeyFrameExtractor {
 
 	private SoundService soundService;
 
-	public HighSoundKeyFrameExtractor(SoundService soundService) {
+	public AudioSceneKeyFrameExtractor(SoundService soundService) {
 		this.soundService = soundService;
 	}
 
 	@Override
-	public List<Integer> getKeyFrames() {
+	public List<Integer> getKeyFrames(int multiplier) {
 		float[] rms = getRMSValues();
 		float variance = getVariance(rms);
 		float deviation = (float) Math.sqrt(variance);
-		System.out.println("Deviation" + Math.sqrt(variance));
+		System.out.println("Audio Deviation " + Math.sqrt(variance));
 		return getKeyFrames(deviation, rms);
-
 	}
 
 	private List<Integer> getKeyFrames(float deviation, float[] rms) {
@@ -61,7 +60,7 @@ public class HighSoundKeyFrameExtractor implements KeyFrameExtractor {
 			// System.out.println(i + " frame: rms-" + rms[i]);
 		}
 		rms[countOfFrames] = sum / countOfFrames;
-		System.out.println("Avg:" + rms[countOfFrames]);
+		System.out.println("Audio Avg:" + rms[countOfFrames]);
 		return rms;
 	}
 
@@ -71,6 +70,12 @@ public class HighSoundKeyFrameExtractor implements KeyFrameExtractor {
 			rms += audioFrame[i] * audioFrame[i];
 		}
 		return (float) Math.sqrt(rms / audioFrame.length);
+	}
+
+	@Override
+	public List<Integer> getKeyFrames(List<Integer> level3, int multiplier) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

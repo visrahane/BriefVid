@@ -30,13 +30,15 @@ public class ButtonPlayActionListener implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		// disable playBtn,enable pauseBn and start playing
 		JButton btn = (JButton) e.getSource();
-		// TODO Auto-generated method stub
-		if (VideoConstant.BUTTON_START_TEXT.toString().equals(btn.getText())) {
-			gui.startPlay();
-			btn.setText(VideoConstant.BUTTON_PAUSE_TEXT);
-		} else if (VideoConstant.BUTTON_PAUSE_TEXT.toString().equals(btn.getText())) {
+		// if isPlay true --> stop else start
+		if (gui.isPlay()) {
+			gui.togglePlay();
 			gui.pausePlay();
 			btn.setText(VideoConstant.BUTTON_START_TEXT);
+		} else {
+			gui.togglePlay();
+			gui.startPlay();
+			btn.setText(VideoConstant.BUTTON_PAUSE_TEXT);
 		}
 
 	}
