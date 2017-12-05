@@ -21,6 +21,7 @@ import javax.swing.SwingUtilities;
 import com.vd.constants.VideoConstant;
 import com.vd.gui.listeners.ButtonPlayActionListener;
 import com.vd.gui.listeners.ButtonStopActionListener;
+import com.vd.gui.listeners.TapestryMouseClickListener;
 import com.vd.gui.listeners.VideoSliderChangeListener;
 import com.vd.player.AVPlayer;
 import com.vd.runnable.VideoRunnable;
@@ -38,6 +39,8 @@ public class GUI {
 
 	private JLabel lblVideoDisplay;
 	private JLabel lblTapestryDisplay;
+
+	ImageIcon tapestryIcon;
 
 	private AVPlayer avPlayer;
 
@@ -84,7 +87,6 @@ public class GUI {
 		sliderPanel.setBackground(Color.gray);
 		sliderPanel.add(btnPlay);
 
-
 		JButton btnStop = new JButton();
 		btnStop.setIcon(null);
 		btnStop.setText("Stop");
@@ -107,6 +109,9 @@ public class GUI {
 		frame.pack();
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		// wd 105 ht 90
+		lblTapestryDisplay.addMouseListener(new TapestryMouseClickListener(this));
 	}
 
 	public GUI() {
@@ -119,7 +124,8 @@ public class GUI {
 	}
 
 	public void displayTapestry(BufferedImage img) {
-		lblTapestryDisplay.setIcon(new ImageIcon(img));
+		tapestryIcon = new ImageIcon(img);
+		lblTapestryDisplay.setIcon(tapestryIcon);
 
 		/*List<BufferedImage> tapestry = new ArrayList<>();
 		tapestry.add((bufferQ.peek()));
