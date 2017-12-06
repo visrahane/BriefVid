@@ -47,9 +47,11 @@ public class KeyFrameService {
 		level3 = new ArrayList<>(totalkeyFrames);
 		System.out.println("Video level3 KeyFrames Count:" + level3.size());
 		System.out.println("Video level3 key frames List : " + level3.toString());
+
 		level2 = keyFrameExtractor.getKeyFrames(level3, 1);
 		System.out.println("Video level2 KeyFrames Count:" + level2.size());
 		System.out.println("Video level2 key frames List : " + level2.toString());
+
 		level1 = keyFrameExtractor.getKeyFrames(level2, 2);
 		System.out.println("Video level1 KeyFrames Count:" + level1.size());
 		System.out.println("Video level1 key frames List : " + level1.toString());
