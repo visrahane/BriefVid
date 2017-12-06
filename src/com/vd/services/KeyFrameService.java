@@ -20,6 +20,7 @@ public class KeyFrameService {
 	private String audioFilePath;
 	private String videoFilePath;
 	private SoundService soundService;
+	public static List<Integer> level1, level2, level3;
 
 	public KeyFrameService(String videoFilePath, String audioFilePath) {
 		this.audioFilePath = audioFilePath;
@@ -43,13 +44,15 @@ public class KeyFrameService {
 		videoKeyFrames.addAll(audioKeyFrames);
 		Set<Integer> totalkeyFrames = new TreeSet<>(videoKeyFrames);
 
-		List<Integer> level3 = new ArrayList<>(totalkeyFrames);
+		level3 = new ArrayList<>(totalkeyFrames);
 		System.out.println("Video level3 KeyFrames Count:" + level3.size());
 		System.out.println("Video level3 key frames List : " + level3.toString());
-		List<Integer> level2 = keyFrameExtractor.getKeyFrames(level3, 1);
+
+		level2 = keyFrameExtractor.getKeyFrames(level3, 1);
 		System.out.println("Video level2 KeyFrames Count:" + level2.size());
 		System.out.println("Video level2 key frames List : " + level2.toString());
-		List<Integer> level1 = keyFrameExtractor.getKeyFrames(level2, 2);
+
+		level1 = keyFrameExtractor.getKeyFrames(level2, 2);
 		System.out.println("Video level1 KeyFrames Count:" + level1.size());
 		System.out.println("Video level1 key frames List : " + level1.toString());
 		return level1;
