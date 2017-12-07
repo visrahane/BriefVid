@@ -17,11 +17,13 @@ public class TapestryMouseClickListener implements MouseListener {
 	private int zoomLevel;
 	int contextFrame;
 	List<Integer> contextFrames;
+	List<Integer> framesCurrentlyDisplayed;
 
 	public TapestryMouseClickListener(GUI gui) {
 		this.gui = gui;
 		zoomLevel = 1;
 		contextFrame = -1;
+		framesCurrentlyDisplayed = KeyFrameService.level1;
 	}
 
 	@Override
@@ -44,54 +46,54 @@ public class TapestryMouseClickListener implements MouseListener {
 		int imageNumber = (frameX * 2) + frameY;
 		TapestryService tapestryService = new TapestryService(gui);
 		BufferedImage tapestryImage;
-		List<Integer> framesToDisplay = null;
 
 		// Zoom in
 		if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
 			System.out.println("shift + click detected!");
+
 			if (zoomLevel < 3) {
 				zoomLevel++;
 			}
 			if (zoomLevel == 2) {
 				contextFrame = KeyFrameService.level1.get(imageNumber);
 				contextFrames = getContextFrames(contextFrame, zoomLevel);
-				framesToDisplay = contextFrames;
+				framesCurrentlyDisplayed = contextFrames;
 			} else if (zoomLevel == 3) {
 				contextFrame = contextFrames.get(imageNumber);
-				framesToDisplay = getContextFrames(contextFrame, zoomLevel);
-
+				framesCurrentlyDisplayed = getContextFrames(contextFrame, zoomLevel);
 			}
-			tapestryImage = tapestryService.prepareTapestry(framesToDisplay);
+			tapestryImage = tapestryService.prepareTapestry(framesCurrentlyDisplayed);
 			tapestryService.displayTapestry(tapestryImage);
 		}
 		// Zoom out
 		else if ((e.getModifiers() & InputEvent.CTRL_MASK) != 0) {
 			System.out.println("ctrl + click detected!");
-			List<Integer> zoomOutframesToDisplay = null;
 
 			if (zoomLevel > 1) {
 				zoomLevel--;
 			}
 			if (zoomLevel == 1) {
-				zoomOutframesToDisplay = KeyFrameService.level1;
+				framesCurrentlyDisplayed = KeyFrameService.level1;
 			} else if (zoomLevel == 2) {
-				zoomOutframesToDisplay = contextFrames;
+				framesCurrentlyDisplayed = contextFrames;
 			}
 
-			tapestryImage = tapestryService.prepareTapestry(zoomOutframesToDisplay);
+			tapestryImage = tapestryService.prepareTapestry(framesCurrentlyDisplayed);
 			tapestryService.displayTapestry(tapestryImage);
 		}
 		// Seek
 		else {
+			int framePtr = -1;
+			framePtr = framesCurrentlyDisplayed.get(imageNumber);
+
 			System.out.println("Frame : " + imageNumber);
 
 			gui.pausePlay();
-			gui.getAvPlayer().getVideo().setCurrentFramePtr(KeyFrameService.level1.get(imageNumber));
+			gui.getAvPlayer().getVideo().setCurrentFramePtr(framePtr);
 			if (gui.isPlay()) {
 				gui.startPlay();
 			} else {
-				gui.displayImage(VideoIOUtil.getFrame(gui.getAvPlayer().getVideo().getFile(),
-						KeyFrameService.level1.get(imageNumber)));
+				gui.displayImage(VideoIOUtil.getFrame(gui.getAvPlayer().getVideo().getFile(), framePtr));
 			}
 		}
 	}
