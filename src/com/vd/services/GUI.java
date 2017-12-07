@@ -3,7 +3,6 @@
  */
 package com.vd.services;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -16,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 import com.vd.constants.VideoConstant;
@@ -35,7 +35,7 @@ public class GUI {
 	private JFrame frame = new JFrame();
 	private JPanel videoPanel;
 	private JPanel sliderPanel;
-	private JPanel bottomPanel;
+	private JScrollPane bottomPanel;
 
 	private JLabel lblVideoDisplay;
 	private JLabel lblTapestryDisplay;
@@ -98,13 +98,13 @@ public class GUI {
 		sliderPanel.add(progressBar);
 		progressBar.addMouseListener(new VideoSliderChangeListener(this));
 
-		bottomPanel = new JPanel(new BorderLayout());
+		bottomPanel = new JScrollPane();
 		bottomPanel.setPreferredSize(new Dimension(1365, 210));
 		bottomPanel.setBackground(Color.gray);
 		frame.getContentPane().add(bottomPanel);
 
 		lblTapestryDisplay = new JLabel();
-		bottomPanel.add(lblTapestryDisplay, BorderLayout.CENTER);
+		bottomPanel.setViewportView(lblTapestryDisplay);
 
 		frame.pack();
 		frame.setVisible(true);
@@ -115,12 +115,16 @@ public class GUI {
 	}
 
 	public GUI() {
-		// TODO Auto-generated constructor stub
+
 	}
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+		GUI gui = new GUI("test",
+				new String[] {
+						"R:/Study/Masters/Fall 2017/CSCI-576 Multimedia/Project/CS576_Project_Videos/USCVillage.rgb",
+		"R:/Study/Masters/Fall 2017/CSCI-576 Multimedia/Project/CS576_Project_Videos/USCVillage.wav" });
+		// BufferedImage img=new BufferedImage();
+		// gui.displayTapestry(img);
 	}
 
 	public void displayTapestry(BufferedImage img) {
