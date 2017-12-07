@@ -111,32 +111,6 @@ public class AVPlayer {
 	}
 
 
-	/*public static void main(String[] args) throws InterruptedException {
-
-		AVPlayer ren = new AVPlayer();
-		ImageDisplayService outputDisplayService = new ImageDisplayService("Video Player");
-		Video video = new Video(args[0], VideoConstant.VIDEO_PLAYER_HEIGHT, VideoConstant.VIDEO_PLAYER_WIDTH);
-		// List<BufferedImage> buffImages = ren.getAllFrames(args);
-
-		// List<byte[]> audioFrames = ren.sound.getAudioBuffer();
-		//		List<BufferedImage> buffImages = VideoIOUtil.getAllFrames(framesList);
-		for (int i = 0; i < 6000; i++) {
-			long currTime = System.nanoTime()/1000000;
-
-			// byte[] frameBytes = framesList.get(i);
-			// ren.displayVideo(args, framesList);
-			BufferedImage img = VideoIOUtil.getFrame(video.getFile(), i);
-
-			// BufferedImage img = buffImages.get(i);
-			outputDisplayService.displayImage(img);
-			// ren.sound.playMusicFrameByFrame(i);
-			// Thread.sleep();
-			// ren.displayFrame(img, args);
-			System.out.println(System.nanoTime()/1000000 - currTime);
-		}
-		// ren.playWAV(args[1]);
-	}*/
-
 	public void start() {
 		fillUpInitialBuffer();
 		startVideoFrameBufferProducer();
@@ -191,29 +165,6 @@ public class AVPlayer {
 	}
 
 
-	/*public static void main(String[] args) {
-		if (args.length < 2) {
-			System.err.println("usage: java -jar AVPlayer.jar [RGB file] [WAV file]");
-			return;
-		}
-		AVPlayer ren = new AVPlayer();
-		// List<byte[]> framesList = ren.getAllFrames(args);
-		// read 1st 1000 frames and display first and last frame for testing
-		List<BufferedImage> buffImages = new ArrayList<>(2);
-		for (int i = 0; i < 5000;) {
-			byte[] frameBytes = VideoIOUtil.readFrameBuffer(new File(args[0]), i);
-			// ren.displayVideo(args, framesList);
-			BufferedImage img = VideoIOUtil.getFrame(frameBytes);
-			buffImages.add(img);
-			// ren.displayFrame(img, args);
-			i += 4999;
-		}
-		BufferedImage intermediateImg =  (mergeImages(buffImages));
-
-		ren.displayFrame(mergeImagesUsingPixel(intermediateImg), args);
-		ren.playWAV(args[1]);
-	}*/
-
 	private static int getAvg(int rgb1, int rgb2) {
 		Color c1 = new Color(rgb1);
 		Color c2 = new Color(rgb2);
@@ -261,7 +212,7 @@ public class AVPlayer {
 	}
 	
 	public Video getCurrentlyPlayingVideo() {
-		return this.video;
+		return video;
 	}
 
 }

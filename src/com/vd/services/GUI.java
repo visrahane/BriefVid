@@ -99,7 +99,7 @@ public class GUI {
 		progressBar.addMouseListener(new VideoSliderChangeListener(this));
 
 		bottomPanel = new JPanel(new BorderLayout());
-		// bottomPanel.setPreferredSize(new Dimension(500, 330));
+		bottomPanel.setPreferredSize(new Dimension(1365, 210));
 		bottomPanel.setBackground(Color.gray);
 		frame.getContentPane().add(bottomPanel);
 
@@ -127,76 +127,11 @@ public class GUI {
 		tapestryIcon = new ImageIcon(img);
 		lblTapestryDisplay.setIcon(tapestryIcon);
 
-		/*List<BufferedImage> tapestry = new ArrayList<>();
-		tapestry.add((bufferQ.peek()));
-		tapestry.add((bufferQ.peek()));
-		outputDisplayService.displayTapestry(VideoIOUtil.mergeImages(tapestry));*/
-		/*
-		JPanel mergePanel = new JPanel();
-		JScrollPane scrollableJScrollPane = new JScrollPane(new JLabel(new ImageIcon(img)));
-		scrollableJScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		mergePanel.add(scrollableJScrollPane);
-		this.getContentPane().add(mergePanel, BorderLayout.SOUTH);
-		 */}
+	}
 
 	public void displayImage(BufferedImage img) {
 		lblVideoDisplay.setIcon(new ImageIcon(img));
-		/*JPanel videoPanel = new JPanel();
-		videoPanel.add(new JLabel(new ImageIcon(img)));
-		this.getContentPane().add(videoPanel);
-
-		JPanel centrePanel = new JPanel();
-		getContentPane().add(centrePanel);
-		JButton btnPlay = new JButton();
-		centrePanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-		btnPlay.setIcon(null);
-		centrePanel.add(btnPlay);
-
-		this.pack();
-		this.setVisible(true);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);*/
-
 	}
-
-	public void displayImage() {/*
-		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
-
-		JPanel topPanel = new JPanel();
-		getContentPane().add(topPanel);
-
-		JLabel lblVideoDisplay = new JLabel(new ImageIcon(img));
-		topPanel.add(lblVideoDisplay);
-
-		JPanel centrePanel = new JPanel();
-		getContentPane().add(centrePanel);
-
-		JButton btnPlay = new JButton();
-		ImageIcon playBtnIcon = new ImageIcon("R:\\Java_Workspace\\Multimedia\\BriefVid\\playButton.png");
-		centrePanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-		btnPlay.setIcon(null);
-		// btnPlay.setSize(new Dimension(50, 50));
-		centrePanel.add(btnPlay);
-
-		JButton btnPause = new JButton();
-		btnPause.setIcon(null);
-		centrePanel.add(btnPause);
-
-		JButton btnStop = new JButton();
-		btnStop.setIcon(null);
-		centrePanel.add(btnStop);
-
-		JSlider slider = new JSlider(0, 6000, 0);
-		centrePanel.add(slider);
-
-		JPanel bottomPanel = new JPanel();
-		// getContentPane().add(bottomPanel);
-
-		JLabel lblTapestryDisplay = new JLabel(new ImageIcon(img));
-		bottomPanel.add(lblTapestryDisplay);
-		this.pack();
-		this.setVisible(true);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	 */}
 
 	public AVPlayer getAvPlayer() {
 		return avPlayer;
@@ -209,14 +144,6 @@ public class GUI {
 	public void startPlay() {
 		videoRunnable = new VideoRunnable(this);
 		videoRunnable.start();
-		/*avPlayer.start();
-		BufferedImage take = null;
-		for (int i = avPlayer.getVideo().getCurrentFramePtr(); i < VideoConstant.VIDEO_FRAME_COUNT; i++) {
-			take = avPlayer.getCurrentPlayedFrame(take);
-			displayImage(take);
-			avPlayer.putIntoAvailableResources(take);
-			avPlayer.playSoundFrame(i - VideoConstant.VIDEO_FRAME_BUFFER_LENGTH);
-		}*/
 	}
 
 	public void pausePlay() {

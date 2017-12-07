@@ -87,15 +87,6 @@ public class FaceDetectorUtil {
 			rectCrop = new Rect(maxMinCoords.minX, maxMinCoords.minY, maxMinCoords.maxX - maxMinCoords.minX,
 					maxMinCoords.maxY - maxMinCoords.minY);
 			image_roi = new Mat(image, rectCrop);
-
-			// scaling detected face to the same height as the keyframe
-			/*Mat dst = new Mat();
-			
-			Size size = new Size(VideoConstant.VIDEO_PLAYER_SCALED_WIDTH - 45,
-					VideoConstant.VIDEO_PLAYER_SCALED_HEIGHT);
-
-			Imgproc.resize(image_roi, dst, size, 0, 0, Imgproc.INTER_AREA);
-			Imgcodecs.imwrite("intermediate.jpg", dst);*/
 		
 			Imgcodecs.imwrite("intermediate.jpg", image_roi);
 		} else {

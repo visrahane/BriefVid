@@ -31,7 +31,5 @@ public class Starter {
 		TapestryService tapestryService = new TapestryService(gui);
 		BufferedImage tapestryImage = tapestryService.prepareTapestry(keyFrames);
 		tapestryService.displayTapestry(tapestryImage);
-		// AVPlayer player = new AVPlayer();
-		// player.start(args);
 	}
 }

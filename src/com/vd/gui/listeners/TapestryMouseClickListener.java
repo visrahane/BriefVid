@@ -49,8 +49,6 @@ public class TapestryMouseClickListener implements MouseListener {
 		// Zoom in
 		if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
 			System.out.println("shift + click detected!");
-			List<Integer> levelFrames = null, prevLevelFrames = null;
-
 			if (zoomLevel < 3) {
 				zoomLevel++;
 			}
