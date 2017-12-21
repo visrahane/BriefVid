@@ -29,6 +29,8 @@ public class SoundService {
 
 	private SourceDataLine dataLine;
 
+	private String fileName;
+
 	private AudioInputStream audioInputStream;
 
 	private final int EXTERNAL_BUFFER_SIZE = (int) SoundConstant.TOTAL_FRAME_SIZE * 50 / 1000;// 524288;
@@ -39,7 +41,12 @@ public class SoundService {
 		return audioFrames.get(index);
 	}
 
+	public int getCountOfFrames() {
+		return audioFrames.size();
+	}
+
 	public SoundService(String fileName) {
+		this.setFileName(fileName);
 		prepareAudioInputStream(fileName);
 		// Obtain the information about the AudioInputStream
 		AudioFormat audioFormat = audioInputStream.getFormat();
@@ -115,5 +122,13 @@ public class SoundService {
 			e1.printStackTrace();
 		}
 		return audioFrames;
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
 	}
 }
