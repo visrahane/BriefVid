@@ -3,4 +3,4 @@ A project that plays video in synch with audio. The video summarization algorith
 
 For the detailed description of the project, please take a look at : https://github.com/visrahane/BriefVid/blob/develop/Project_Fall2017_CS576.pdf
 <br>
-For a quick idea of the implementation and techniques used for video summaraization and synching video and audio, please take a look at : https://github.com/visrahane/BriefVid/blob/develop/BriefVidSlides.pptx
+For a quick idea of the implementation and techniques used for video summarization and synching video and audio, please take a look at : https://github.com/visrahane/BriefVid/blob/develop/BriefVidSlides.pptx
